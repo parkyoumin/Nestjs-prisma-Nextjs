@@ -7,17 +7,21 @@ import { Request } from "express";
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly userService: UserService) {
+    const secret = process.env.JWT_SECRET_KEY;
+
+    if (!secret) {
+      throw new Error(
+        "FATAL ERROR: JWT_SECRET_KEY is not defined in .env file",
+      );
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          const accessToken = req?.cookies?.access_token;
-          if (!accessToken) {
-            return null;
-          }
-          return accessToken;
+          return req?.cookies?.access_token;
         },
       ]),
-      secretOrKey: process.env.JWT_SECRET_KEY,
+      secretOrKey: secret,
       ignoreExpiration: false,
     });
   }
@@ -31,6 +35,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (user) {
       return user;
     } else {
+      console.error(
+        "User not found with providerAccountId:",
+        providerAccountId,
+      );
       throw new NotFoundException("User not found");
     }
   }
