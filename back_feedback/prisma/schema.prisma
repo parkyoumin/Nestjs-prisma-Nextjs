@@ -26,19 +26,22 @@ model User {
 }
 
 model Project {
-  id        String    @id @default(uuid())
+  id        String     @id @default(uuid())
   title     String
   userId    BigInt
-  user      User      @relation(fields: [userId], references: [id])
-  deletedAt DateTime? @map("deleted_at")
+  user      User       @relation(fields: [userId], references: [id])
+  createdAt DateTime   @default(now()) @map("created_at")
+  deletedAt DateTime?  @map("deleted_at")
 
   feedbacks Feedback[]
 }
 
 model Feedback {
-  id        Int       @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   message   String
   projectId String
-  
-  project   Project   @relation(fields: [projectId], references: [id])
+  createdAt DateTime   @default(now()) @map("created_at")
+  deletedAt DateTime?  @map("deleted_at")
+
+  project   Project    @relation(fields: [projectId], references: [id])
 }
