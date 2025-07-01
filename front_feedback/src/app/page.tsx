@@ -1,47 +1,21 @@
 import { BarChart, List, MousePointerClick } from "lucide-react";
+import Image from "next/image";
+import PrimaryButton from "@/components/PrimaryButton";
 
 export default function Home() {
   return (
     <div className="bg-white text-gray-800">
-      <header className="w-full border-b border-gray-200">
-        <div className="container mx-auto flex h-20 items-center justify-between px-4">
-          <div className="text-xl font-bold">
-            <img src="/logo.svg" alt="logo" className="h-16" />
-          </div>
-
-          <div className="flex items-center space-x-8">
-            <nav className="hidden items-center space-x-8 md:flex">
-              <a href="#" className="hover:text-blue-600">
-                Product
-              </a>
-              <a href="#" className="hover:text-blue-600">
-                Features
-              </a>
-              <a href="#" className="hover:text-blue-600">
-                Pricing
-              </a>
-              <a href="#" className="hover:text-blue-600">
-                Resources
-              </a>
-            </nav>
-            <a href="http://localhost:3001/auth/google">
-              <button className="rounded-lg bg-primary px-4 py-2 font-semibold text-black hover:bg-primary/80">
-                Get started
-              </button>
-            </a>
-          </div>
-        </div>
-      </header>
-
       <main>
         {/* Hero Section */}
         <section className="py-16 md:py-24">
           <div className="mx-auto grid max-w-7xl items-center gap-12 px-32 md:grid-cols-[auto,1fr]">
             <div className="w-full md:w-[480px]">
-              <img
+              <Image
                 src="/main-illustration.svg"
                 alt="illustration"
                 className="h-auto w-full"
+                width={480}
+                height={480}
               />
             </div>
             <div className="text-left">
@@ -52,11 +26,12 @@ export default function Home() {
                 Feedback Central is the easiest way to gather feedback from your
                 users, organize it, and turn it into actionable insights.
               </p>
-              <a href="http://localhost:3001/auth/google">
-                <button className="mt-8 w-full rounded-lg bg-primary px-6 py-3 font-semibold text-black hover:bg-primary/80">
-                  Get started
-                </button>
-              </a>
+              <PrimaryButton
+                href="http://localhost:3001/auth/google"
+                className="mt-8"
+              >
+                Get started
+              </PrimaryButton>
             </div>
           </div>
         </section>
