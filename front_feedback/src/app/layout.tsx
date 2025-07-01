@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
 
 const notoSansKR = Noto_Sans_KR({
   weight: ["300", "400", "500", "600", "700"],
@@ -19,11 +18,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={notoSansKR.className + " h-screen"}>
-        <Header />
-        {children}
-      </body>
+    <html lang="en" className="h-full bg-white">
+      <body className={`${notoSansKR.className} h-full`}>{children}</body>
     </html>
   );
 }

@@ -5,7 +5,7 @@ const HaveToLoginPage = () => {
   const loginUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-50/90">
+    <main className="flex h-full flex-col items-center justify-center bg-zinc-50/90">
       <div className="w-full max-w-md text-center">
         <div className="relative mx-auto mb-10 flex h-48 w-80 items-center justify-center">
           <Image
