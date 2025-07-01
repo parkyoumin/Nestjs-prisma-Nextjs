@@ -1,10 +1,10 @@
 import Link from "next/link";
 import React from "react";
 
-interface PrimaryButtonProps {
+interface PrimaryButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   href?: string;
-  onClick?: () => void;
   className?: string;
   variant?: "primary" | "grey";
 }
@@ -12,9 +12,9 @@ interface PrimaryButtonProps {
 const PrimaryButton = ({
   children,
   href,
-  onClick,
   className = "",
   variant = "primary",
+  ...rest
 }: PrimaryButtonProps) => {
   const baseClasses =
     "inline-block w-full rounded-lg px-6 py-3 font-semibold transition-colors text-center";
@@ -35,7 +35,7 @@ const PrimaryButton = ({
   }
 
   return (
-    <button onClick={onClick} className={combinedClasses}>
+    <button {...rest} className={combinedClasses}>
       {children}
     </button>
   );
