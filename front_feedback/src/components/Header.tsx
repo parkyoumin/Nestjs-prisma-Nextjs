@@ -34,12 +34,6 @@ const Header = () => {
               <div className="absolute right-0 mt-2 w-48 origin-top-right scale-95 transform-gpu rounded-md bg-white p-2 text-sm shadow-lg opacity-0 transition-all duration-200 ease-in-out group-hover:scale-100 group-hover:opacity-100">
                 <p className="px-2 py-1.5 font-semibold">{user.email}</p>
                 <div className="my-1 h-px bg-gray-100" />
-                <Link
-                  href="/dashboard"
-                  className="block w-full px-2 py-1.5 text-left text-gray-700 hover:bg-gray-100"
-                >
-                  Dashboard
-                </Link>
                 <button
                   onClick={handleLogout}
                   className="block w-full px-2 py-1.5 text-left text-red-600 hover:bg-gray-100"

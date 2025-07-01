@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
-import { getUser } from "../../services/userService";
+import { getUser } from "@/services/userService";
+import { Loader2 } from "lucide-react";
 
 export default function LoginSuccessPage() {
   const router = useRouter();
@@ -23,7 +24,11 @@ export default function LoginSuccessPage() {
     };
 
     fetchUser();
-  }, []);
+  }, [router, setUser]);
 
-  return <p>Logging you in...</p>;
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+      <Loader2 className="h-12 w-12 animate-spin text-white" />
+    </div>
+  );
 }

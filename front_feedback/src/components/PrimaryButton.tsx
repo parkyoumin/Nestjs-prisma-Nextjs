@@ -6,6 +6,7 @@ interface PrimaryButtonProps {
   href?: string;
   onClick?: () => void;
   className?: string;
+  variant?: "primary" | "grey";
 }
 
 const PrimaryButton = ({
@@ -13,20 +14,28 @@ const PrimaryButton = ({
   href,
   onClick,
   className = "",
+  variant = "primary",
 }: PrimaryButtonProps) => {
   const baseClasses =
-    "inline-block w-full rounded-lg bg-primary px-6 py-3 font-semibold text-black hover:bg-primary/80 transition-colors";
+    "inline-block w-full rounded-lg px-6 py-3 font-semibold transition-colors text-center";
+
+  const variants = {
+    primary: "bg-primary text-black hover:bg-primary/80",
+    grey: "bg-gray-200 text-gray-700 hover:bg-gray-300",
+  };
+
+  const combinedClasses = `${baseClasses} ${variants[variant]} ${className}`;
 
   if (href) {
     return (
-      <Link href={href} className={`${baseClasses} text-center ${className}`}>
+      <Link href={href} className={combinedClasses}>
         {children}
       </Link>
     );
   }
 
   return (
-    <button onClick={onClick} className={`${baseClasses} ${className}`}>
+    <button onClick={onClick} className={combinedClasses}>
       {children}
     </button>
   );
