@@ -5,12 +5,12 @@ import { Project } from "../domain/project.entity";
 import { CreateProjectDto, UpdateProjectDto } from "src/types/project.type";
 import { ForbiddenException } from "@nestjs/common";
 
-// IProjectRepository의 가짜(Mock) 객체를 생성합니다.
 const mockProjectRepository = {
   createProject: jest.fn(),
   updateProject: jest.fn(),
   findById: jest.fn(),
   deleteProject: jest.fn(),
+  findProjectsByUserId: jest.fn(),
 };
 
 describe("ProjectService", () => {
@@ -121,6 +121,40 @@ describe("ProjectService", () => {
       await expect(service.deleteProject(projectId, userId)).rejects.toThrow(
         ForbiddenException,
       );
+    });
+  });
+
+  describe("getProjects", () => {
+    it("사용자의 모든 프로젝트 목록과 피드백 개수를 반환해야 한다", async () => {
+      // Given
+      const userId = BigInt(1);
+      const expectedProjects: Project[] = [
+        {
+          id: "uuid-1",
+          title: "Project 1",
+          userId,
+          createdAt: new Date(),
+          deletedAt: null,
+          feedbackCount: 120,
+        },
+        {
+          id: "uuid-2",
+          title: "Project 2",
+          userId,
+          createdAt: new Date(),
+          deletedAt: null,
+          feedbackCount: 85,
+        },
+      ];
+      repository.findProjectsByUserId.mockResolvedValue(expectedProjects);
+
+      // When
+      const result = await service.getProjects(userId);
+
+      // Then
+      expect(result).toEqual(expectedProjects);
+      expect(repository.findProjectsByUserId).toHaveBeenCalledTimes(1);
+      expect(repository.findProjectsByUserId).toHaveBeenCalledWith(userId);
     });
   });
 });

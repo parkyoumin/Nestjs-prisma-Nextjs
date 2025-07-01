@@ -4,4 +4,5 @@ export class Project {
   userId: bigint;
   createdAt: Date;
   deletedAt: Date | null;
+  feedbackCount?: number;
 }

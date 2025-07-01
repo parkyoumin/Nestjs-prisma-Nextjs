@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Post,
   Put,
@@ -68,5 +69,11 @@ export class ProjectController {
   ) {
     const { user } = req;
     return this.projectService.deleteProject(id, user.id);
+  }
+
+  @Get()
+  async getProjects(@Req() req: AuthenticatedRequest) {
+    const { user } = req;
+    return this.projectService.getProjects(user.id);
   }
 }

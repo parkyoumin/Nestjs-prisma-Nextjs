@@ -31,4 +31,8 @@ export class ProjectService {
       throw new ForbiddenException("Project not found or access denied.");
     }
   }
+
+  async getProjects(userId: bigint): Promise<Project[]> {
+    return this.projectRepository.findProjectsByUserId(userId);
+  }
 }
