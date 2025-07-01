@@ -27,7 +27,7 @@ axiosInstance.interceptors.response.use(
             break;
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     }
 

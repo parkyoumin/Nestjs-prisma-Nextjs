@@ -13,7 +13,6 @@ export default function LoginSuccessPage() {
     const fetchUser = async () => {
       try {
         const res = await getUser();
-        console.log(res);
 
         setUser({ id: res.data.id, email: res.data.email });
         router.replace("/dashboard");

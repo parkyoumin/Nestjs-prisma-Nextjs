@@ -169,8 +169,6 @@ export class AuthController {
       throw new BadRequestException("Have to login");
     }
 
-    console.log("g2");
-
     await this.authService.withdraw(providerAccountId);
 
     res.clearCookie("provider_account_id", {
