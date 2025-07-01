@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { UserRepository } from "./user.repository";
-import { CreateUser, User } from "src/types/user.type";
+import { Injectable, NotFoundException, Inject } from "@nestjs/common";
+import { CreateUser } from "src/types/user.type";
+import { IUserRepository } from "../domain/user.repository";
+import { User } from "../domain/user.entity";
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    @Inject("IUserRepository")
+    private readonly userRepository: IUserRepository,
+  ) {}
 
   async createUser(createUser: CreateUser) {
     const user: User = await this.userRepository.createUser(createUser);

@@ -18,15 +18,14 @@ axiosInstance.interceptors.response.use(
     if (error.response.status === 401 && typeof window !== "undefined") {
       try {
         const refreshResponse = await get("/auth/refresh");
-        console.log(refreshResponse);
 
-        // switch (refreshResponse.status) {
-        //   case 200:
-        //     return axiosInstance(error.config);
-        //   default:
-        //     window.location.href = "/have-to-login";
-        //     break;
-        // }
+        switch (refreshResponse.status) {
+          case 200:
+            return axiosInstance(error.config);
+          default:
+            window.location.href = "/have-to-login";
+            break;
+        }
       } catch (error) {
         console.log(error);
       }

@@ -14,14 +14,15 @@ datasource db {
 }
 
 model User {
-  id                 BigInt @id @default(autoincrement())
-  providerAccountId  String @unique @map("provider_account_id")
+  id                 BigInt   @id @default(autoincrement())
+  providerAccountId  String   @unique @map("provider_account_id")
   email              String
   name               String
-  refreshToken       String? @map("refresh_token")
+  refreshToken       String?  @map("refresh_token")
   createdAt          DateTime @default(now()) @map("created_at")
+  deletedAt          DateTime? @map("deleted_at")
 
-  projects  Project[]
+  projects Project[]
 }
 
 model Project {
@@ -29,6 +30,7 @@ model Project {
   title     String
   userId    BigInt
   user      User      @relation(fields: [userId], references: [id])
+  deletedAt DateTime? @map("deleted_at")
 
   feedbacks Feedback[]
 }

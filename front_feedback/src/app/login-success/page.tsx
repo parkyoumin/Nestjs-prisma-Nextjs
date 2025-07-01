@@ -16,10 +16,10 @@ export default function LoginSuccessPage() {
         console.log(res);
 
         setUser({ id: res.data.id, email: res.data.email });
-        // router.replace("/dashboard");
+        router.replace("/dashboard");
       } catch (e) {
         console.error(e);
-        // router.replace("/");
+        router.replace("/");
       }
     };
 

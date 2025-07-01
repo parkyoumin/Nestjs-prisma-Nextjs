@@ -8,7 +8,7 @@ import {
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { Request, Response } from "express";
-import { UserService } from "src/user/user.service";
+import { UserService } from "src/user/application/user.service";
 import { AuthGuard } from "@nestjs/passport";
 import { GoogleUser } from "src/types/auth.type";
 import { CreateUser, User } from "src/types/user.type";

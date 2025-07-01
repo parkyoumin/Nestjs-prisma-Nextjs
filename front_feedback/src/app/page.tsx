@@ -1,8 +1,4 @@
-import { get } from "@/api";
 import { BarChart, List, MousePointerClick } from "lucide-react";
-import { InteractiveButton } from "@/components/InteractiveButton";
-import { logout } from "@/services/userService";
-import LogoutButton from "@/components/LogoutButton";
 
 export default function Home() {
   return (
@@ -28,13 +24,11 @@ export default function Home() {
                 Resources
               </a>
             </nav>
-            <InteractiveButton
-              href="http://localhost:3001/auth/google"
-              className="rounded-lg bg-primary px-4 py-2 font-semibold text-black hover:bg-primary/80"
-            >
-              Get started
-            </InteractiveButton>
-            <LogoutButton />
+            <a href="http://localhost:3001/auth/google">
+              <button className="rounded-lg bg-primary px-4 py-2 font-semibold text-black hover:bg-primary/80">
+                Get started
+              </button>
+            </a>
           </div>
         </div>
       </header>
@@ -58,12 +52,11 @@ export default function Home() {
                 Feedback Central is the easiest way to gather feedback from your
                 users, organize it, and turn it into actionable insights.
               </p>
-              <InteractiveButton
-                href="http://localhost:3001/auth/google"
-                className="mt-8 w-full rounded-lg bg-primary px-6 py-3 font-semibold text-black hover:bg-primary/80"
-              >
-                Get started
-              </InteractiveButton>
+              <a href="http://localhost:3001/auth/google">
+                <button className="mt-8 w-full rounded-lg bg-primary px-6 py-3 font-semibold text-black hover:bg-primary/80">
+                  Get started
+                </button>
+              </a>
             </div>
           </div>
         </section>

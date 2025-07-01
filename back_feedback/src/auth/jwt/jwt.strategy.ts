@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy, ExtractJwt } from "passport-jwt";
-import { UserService } from "src/user/user.service";
+import { UserService } from "src/user/application/user.service";
 import { Request } from "express";
 
 @Injectable()
@@ -10,6 +10,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
+          console.log(req?.cookies);
+
           const accessToken = req?.cookies?.access_token;
           if (!accessToken) {
             return null;
