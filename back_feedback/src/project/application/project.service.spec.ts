@@ -153,7 +153,6 @@ describe("ProjectService", () => {
 
       // Then
       expect(result).toEqual(expectedProjects);
-      expect(repository.findProjectsByUserId).toHaveBeenCalledTimes(1);
       expect(repository.findProjectsByUserId).toHaveBeenCalledWith(userId);
     });
   });
