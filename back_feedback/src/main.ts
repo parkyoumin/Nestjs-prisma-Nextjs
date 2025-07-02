@@ -16,6 +16,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  // TODO : env
   app.enableCors({
     origin: "http://localhost:3002",
     credentials: true,

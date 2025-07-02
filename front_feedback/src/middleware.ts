@@ -41,6 +41,7 @@ export async function middleware(request: NextRequest) {
 
   // 리프레시 토큰으로 새 accessToken 발급 시도
   try {
+    // TODO : env
     const refreshResponse = await fetch("http://localhost:3001/auth/refresh", {
       method: "GET",
       headers: {
