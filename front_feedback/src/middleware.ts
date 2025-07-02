@@ -11,10 +11,10 @@ export async function middleware(request: NextRequest) {
   }
 
   // 2. 인증이 필요 없는 공개 경로 정의
-  const publicPaths = ["/feedback", "/have-to-login", "/login-success"];
+  const publicPaths = ["/", "/have-to-login", "/login-success"];
 
-  // 3. 공개 경로는 인증 로직을 건너뜀
-  if (publicPaths.includes(pathname)) {
+  // 3. 공개 경로 및 피드백 경로는 인증 로직을 건너뜀
+  if (pathname.startsWith("/feedback") || publicPaths.includes(pathname)) {
     return NextResponse.next();
   }
 
@@ -67,7 +67,6 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.redirect(
     new URL("/have-to-login", request.url),
   );
-  localStorage.removeItem("auth-storage");
   response.cookies.delete("access_token");
   response.cookies.delete("refresh_token");
   response.cookies.delete("provider_account_id");
