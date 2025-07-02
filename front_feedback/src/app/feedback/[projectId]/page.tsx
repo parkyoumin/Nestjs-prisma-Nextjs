@@ -2,23 +2,24 @@ interface FeedbackPageProps {
   params: {
     projectId: string;
   };
+  searchParams: {
+    name?: string;
+  };
 }
 
-export default async function FeedbackPage({ params }: FeedbackPageProps) {
+export default async function FeedbackPage({
+  params,
+  searchParams,
+}: FeedbackPageProps) {
   const { projectId } = params;
-
-  // Mock project data
-  const project = {
-    id: projectId,
-    title: "Sample Project Title",
-  };
+  const projectName = searchParams.name
+    ? decodeURIComponent(searchParams.name)
+    : "Sample Project Title";
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-2xl rounded-lg bg-white p-8 shadow-md">
-        <h1 className="mb-2 text-3xl font-bold text-gray-800">
-          {project.title}
-        </h1>
+        <h1 className="mb-2 text-3xl font-bold text-gray-800">{projectName}</h1>
         <p className="mb-8 text-gray-500">
           We would love to hear your feedback for this project!
         </p>

@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { Link as LinkIcon, MoreVertical } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import {
+  Link as LinkIcon,
+  MoreVertical,
+  EllipsisVerticalIcon,
+} from "lucide-react";
 import { Project } from "@/types/project";
 import PrimaryButton from "./PrimaryButton";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface ProjectCardProps {
   project: Project;
@@ -18,22 +23,27 @@ export default function ProjectCard({
   onDelete,
 }: ProjectCardProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const handleCopyLink = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigator.clipboard.writeText(
-      `${window.location.origin}/feedback/${project.id}`,
-    );
-    // You might want to show a toast notification here
-    alert("Link copied!");
-  };
+  const router = useRouter();
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const handleMenuToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsMenuOpen((prev) => !prev);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuRef]);
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -49,10 +59,19 @@ export default function ProjectCard({
     setIsMenuOpen(false);
   };
 
+  const copyLink = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const encodedProjectName = encodeURIComponent(project.title);
+    const url = `${window.location.origin}/feedback/${project.id}?name=${encodedProjectName}`;
+    navigator.clipboard.writeText(url);
+    alert("Link copied!");
+  };
+
   return (
     <Link
       href={`/project/${project.id}`}
-      className="relative block rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+      className="relative block h-full rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="flex h-full flex-col justify-between">
         <div>
@@ -64,7 +83,7 @@ export default function ProjectCard({
           </p>
         </div>
         <PrimaryButton
-          onClick={handleCopyLink}
+          onClick={copyLink}
           variant="grey"
           className="mt-4 !w-fit !px-3 !py-1.5 !text-sm"
         >
@@ -84,7 +103,10 @@ export default function ProjectCard({
           <MoreVertical className="h-5 w-5 text-gray-500" />
         </button>
         {isMenuOpen && (
-          <div className="absolute right-0 mt-2 w-32 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+          <div
+            ref={menuRef}
+            className="absolute right-0 mt-2 w-32 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5"
+          >
             <div
               className="py-1"
               role="menu"
