@@ -3,6 +3,17 @@ import type { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // 미들웨어가 정적 파일, API 라우트 등 내부 요청을 가로채지 않도록 예외 처리
+  if (
+    pathname.startsWith("/_next/") || // Next.js 빌드 결과물
+    pathname.startsWith("/api/") || // API 라우트
+    pathname.startsWith("/static/") || // 정적 파일 (public 폴더)
+    pathname.includes("/favicon.ico")
+  ) {
+    return NextResponse.next();
+  }
+
   const accessToken = request.cookies.get("access_token")?.value;
 
   // 1. 로그인한 사용자가 루트 경로(/) 접근 시 대시보드로 리디렉션
