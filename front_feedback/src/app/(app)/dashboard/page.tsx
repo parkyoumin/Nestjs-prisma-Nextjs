@@ -10,6 +10,7 @@ import { createProject, getProjects } from "@/services/projectService";
 
 export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projectTitle, setProjectTitle] = useState("");
@@ -51,6 +52,10 @@ export default function DashboardPage() {
     }
   };
 
+  const filteredProjects = projects.filter((project) =>
+    project.title.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
   return (
     <>
       <div className="mx-auto max-w-7xl px-6 py-12 lg:px-32">
@@ -67,6 +72,8 @@ export default function DashboardPage() {
             <input
               type="text"
               placeholder="Search projects"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
@@ -81,7 +88,7 @@ export default function DashboardPage() {
 
         {/* Project List */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project: Project) => (
+          {filteredProjects.map((project: Project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>
