@@ -37,24 +37,32 @@ export class ProjectPrismaRepository implements IProjectRepository {
   }
 
   async deleteProject(id: string, userId: bigint): Promise<boolean> {
-    const result = await this.prisma.project.deleteMany({
-      where: { id, userId },
+    const result = await this.prisma.project.updateMany({
+      where: { id, userId, deletedAt: null },
+      data: {
+        deletedAt: new Date(),
+      },
     });
 
     return result.count > 0;
   }
 
   async findById(id: string): Promise<Project | null> {
-    return this.prisma.project.findUnique({ where: { id } });
+    return this.prisma.project.findUnique({
+      where: { id, deletedAt: null },
+    });
   }
 
   async findProjectsByUserId(userId: bigint): Promise<Project[]> {
     const projectsWithCount = await this.prisma.project.findMany({
-      where: { userId },
+      where: { userId, deletedAt: null },
       include: {
         _count: {
-          select: { feedbacks: true },
+          select: { feedbacks: { where: { deletedAt: null } } },
         },
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
 
