@@ -18,7 +18,7 @@ const Header = () => {
 
   return (
     <header className="w-full border-b border-gray-200 bg-white">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-32">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-8">
         <Link href="/" className="text-xl font-bold">
           <img src="/logo.svg" alt="logo" className="h-16" />
         </Link>
