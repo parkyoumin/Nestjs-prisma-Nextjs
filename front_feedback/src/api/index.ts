@@ -52,10 +52,7 @@ const get = async (
       }
     })
     .catch((error) => {
-      [getData.status, getData.data] = isEmpty(error.response)
-        ? [500, error.message]
-        : [error.response.status, error.response.data];
-      return getData;
+      return Promise.reject(error);
     });
 };
 
@@ -77,11 +74,7 @@ const post = async (
       }
     })
     .catch((error) => {
-      [getData.status, getData.data] = isEmpty(error.response)
-        ? [500, error.message]
-        : [error.response.status, error.response.data];
-
-      return getData;
+      return Promise.reject(error);
     });
 };
 
@@ -103,10 +96,7 @@ const put = async (
       }
     })
     .catch((error) => {
-      [getData.status, getData.data] = isEmpty(error.response)
-        ? [500, error.message]
-        : [error.response.status, error.response.content];
-      return getData;
+      return Promise.reject(error);
     });
 };
 
@@ -127,10 +117,7 @@ const del = async (
       }
     })
     .catch((error) => {
-      [getData.status, getData.data] = isEmpty(error.response)
-        ? [500, error.message]
-        : [error.response.status, error.response.data];
-      return getData;
+      return Promise.reject(error);
     });
 };
 
