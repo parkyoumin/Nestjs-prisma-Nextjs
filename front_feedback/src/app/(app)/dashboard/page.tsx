@@ -1,27 +1,50 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Project } from "@/types/project";
 import ProjectCard from "@/components/ProjectCard";
 import { Search } from "lucide-react";
 import Modal from "@/components/Modal";
 import PrimaryButton from "@/components/PrimaryButton";
-import { createProject, getProjects } from "@/services/projectService";
+import {
+  createProject,
+  deleteProject,
+  getProjects,
+  updateProject,
+} from "@/services/projectService";
 
 export default function DashboardPage() {
+  // --- States for Project List ---
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [projectTitle, setProjectTitle] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // --- States for Project Creation ---
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newProjectTitle, setNewProjectTitle] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
+  // --- States for Project Editing ---
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [updatedProjectTitle, setUpdatedProjectTitle] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+
+  // --- States for Project Deletion ---
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(
+    null,
+  );
+
+  const router = useRouter();
+
+  // --- Fetch Projects ---
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         const fetchedProjects = await getProjects();
-
         setProjects(fetchedProjects || []);
       } catch (err) {
         console.error("Failed to fetch projects:", err);
@@ -31,24 +54,84 @@ export default function DashboardPage() {
     fetchProjects();
   }, []);
 
+  // --- Handle Project Creation ---
   const handleCreateProject = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!projectTitle.trim()) {
-      setError("Project title cannot be empty.");
+    if (!newProjectTitle.trim()) {
+      setCreateError("Project title cannot be empty.");
       return;
     }
-    setIsLoading(true);
-    setError(null);
+    setIsCreating(true);
+    setCreateError(null);
 
     try {
-      const newProject = await createProject(projectTitle);
+      const newProject = await createProject(newProjectTitle);
       setProjects((prevProjects) => [newProject, ...prevProjects]);
-      setIsModalOpen(false);
-      setProjectTitle("");
+      setIsCreateModalOpen(false);
+      setNewProjectTitle("");
     } catch (err: any) {
-      setError(err.message);
+      setCreateError(err.message);
     } finally {
-      setIsLoading(false);
+      setIsCreating(false);
+    }
+  };
+
+  // --- Handle Project Editing ---
+  const handleEditClick = (project: Project) => {
+    setEditingProject(project);
+    setUpdatedProjectTitle(project.title);
+    setIsEditModalOpen(true);
+    setUpdateError(null);
+  };
+
+  const handleUpdateProject = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingProject || !updatedProjectTitle.trim()) {
+      setUpdateError("Project title cannot be empty.");
+      return;
+    }
+    setIsUpdating(true);
+    setUpdateError(null);
+
+    try {
+      const updatedProject = await updateProject(
+        editingProject.id,
+        updatedProjectTitle,
+      );
+      setProjects((prevProjects) =>
+        prevProjects.map((p) =>
+          p.id === editingProject.id ? updatedProject : p,
+        ),
+      );
+      setIsEditModalOpen(false);
+      setEditingProject(null);
+    } catch (err: any) {
+      setUpdateError(err.message);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // --- Handle Project Deletion ---
+  const handleDeleteClick = (projectId: string) => {
+    setDeletingProjectId(projectId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingProjectId) return;
+
+    try {
+      await deleteProject(deletingProjectId);
+      setProjects((prevProjects) =>
+        prevProjects.filter((p) => p.id !== deletingProjectId),
+      );
+    } catch (err: any) {
+      console.error("Failed to delete project:", err);
+      // You might want to show a toast notification for the error
+    } finally {
+      setIsDeleteModalOpen(false);
+      setDeletingProjectId(null);
     }
   };
 
@@ -78,7 +161,7 @@ export default function DashboardPage() {
             />
           </div>
           <PrimaryButton
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setIsCreateModalOpen(true)}
             className="!w-auto !px-5 !py-2.5"
             variant="primary"
           >
@@ -89,13 +172,21 @@ export default function DashboardPage() {
         {/* Project List */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredProjects.map((project: Project) => (
-            <ProjectCard key={project.id} project={project} />
+            <ProjectCard
+              key={project.id}
+              project={project}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
+            />
           ))}
         </div>
       </div>
 
       {/* Create Project Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      >
         <div className="space-y-6">
           <h2 className="text-2xl font-bold text-gray-800">New Project</h2>
           <form onSubmit={handleCreateProject}>
@@ -111,34 +202,116 @@ export default function DashboardPage() {
                 name="title"
                 type="text"
                 required
-                value={projectTitle}
-                onChange={(e) => setProjectTitle(e.target.value)}
+                value={newProjectTitle}
+                onChange={(e) => setNewProjectTitle(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 placeholder="My Awesome Project"
-                disabled={isLoading}
+                disabled={isCreating}
               />
-              {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+              {createError && (
+                <p className="mt-2 text-sm text-red-600">{createError}</p>
+              )}
             </div>
             <div className="mt-8 flex justify-end space-x-4">
               <PrimaryButton
                 type="button"
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => setIsCreateModalOpen(false)}
                 variant="grey"
-                disabled={isLoading}
+                disabled={isCreating}
               >
                 Cancel
               </PrimaryButton>
               <PrimaryButton
                 type="submit"
                 variant="primary"
-                disabled={isLoading}
+                disabled={isCreating}
               >
-                {isLoading ? "Creating..." : "Create Project"}
+                {isCreating ? "Creating..." : "Create Project"}
               </PrimaryButton>
             </div>
           </form>
         </div>
       </Modal>
+
+      {/* Edit Project Modal */}
+      {editingProject && (
+        <Modal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+        >
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">Edit Project</h2>
+            <form onSubmit={handleUpdateProject}>
+              <div className="space-y-2">
+                <label
+                  htmlFor="edit-title"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Project Title
+                </label>
+                <input
+                  id="edit-title"
+                  name="title"
+                  type="text"
+                  required
+                  value={updatedProjectTitle}
+                  onChange={(e) => setUpdatedProjectTitle(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                  placeholder="My Awesome Project"
+                  disabled={isUpdating}
+                />
+                {updateError && (
+                  <p className="mt-2 text-sm text-red-600">{updateError}</p>
+                )}
+              </div>
+              <div className="mt-8 flex justify-end space-x-4">
+                <PrimaryButton
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  variant="grey"
+                  disabled={isUpdating}
+                >
+                  Cancel
+                </PrimaryButton>
+                <PrimaryButton
+                  type="submit"
+                  variant="primary"
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? "Updating..." : "Update Project"}
+                </PrimaryButton>
+              </div>
+            </form>
+          </div>
+        </Modal>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <Modal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+        >
+          <div className="space-y-6 text-center">
+            <h2 className="text-2xl font-bold text-gray-800">Delete Project</h2>
+            <p className="text-gray-600">
+              Are you sure you want to delete this project? This action cannot
+              be undone.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <PrimaryButton
+                onClick={() => setIsDeleteModalOpen(false)}
+                variant="grey"
+              >
+                Cancel
+              </PrimaryButton>
+              <PrimaryButton onClick={handleConfirmDelete} variant="primary">
+                Delete
+              </PrimaryButton>
+            </div>
+          </div>
+        </Modal>
+      )}
     </>
   );
 }
