@@ -7,6 +7,10 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
+const axiosPublicInstance = axios.create({
+  baseURL: apiUrl,
+});
+
 export interface CommonResponse {
   status: number;
   data: any;
@@ -78,6 +82,28 @@ const post = async (
     });
 };
 
+const publicPost = async (
+  url: string,
+  data?: any,
+  config?: AxiosRequestConfig,
+): Promise<CommonResponse> => {
+  const getData: CommonResponse = { status: 0, data: {} };
+  return await axiosPublicInstance
+    .post(url, data, config)
+    .then((response) => {
+      if (response.status >= 200 && response.status < 400) {
+        getData.status = response.status;
+        getData.data = response.data;
+        return getData;
+      } else {
+        throw new Error("API request failed");
+      }
+    })
+    .catch((error) => {
+      return Promise.reject(error);
+    });
+};
+
 const put = async (
   url: string,
   data?: any,
@@ -121,4 +147,4 @@ const del = async (
     });
 };
 
-export { get, post, put, del };
+export { get, post, publicPost, put, del };
