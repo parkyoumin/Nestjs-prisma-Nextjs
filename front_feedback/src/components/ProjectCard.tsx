@@ -23,7 +23,7 @@ export default function ProjectCard({
     e.preventDefault();
     e.stopPropagation();
     navigator.clipboard.writeText(
-      `${window.location.origin}/project/${project.id}`,
+      `${window.location.origin}/feedback/${project.id}`,
     );
     // You might want to show a toast notification here
     alert("Link copied!");
