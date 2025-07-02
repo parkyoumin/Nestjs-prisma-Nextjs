@@ -57,18 +57,21 @@ export class AuthController {
 
     res.cookie("provider_account_id", providerAccountId, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     });
     res.cookie("access_token", accessToken, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      maxAge: 1000 * 60 * 60, // 1 hour
     });
     res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     });
 
     res.redirect("http://localhost:3002/login-success");
@@ -105,13 +108,15 @@ export class AuthController {
 
     res.cookie("access_token", newAccessToken, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      maxAge: 1000 * 60 * 60, // 1 hour
     });
     res.cookie("refresh_token", newRefreshToken, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     });
 
     return {
