@@ -42,8 +42,7 @@ export class FeedbackService {
     }
 
     const project = await this.projectRepository.findById(feedback.projectId);
-    // This check is belt-and-suspenders, as a feedback can't exist without a project
-    // due to DB constraints, but good for robustness.
+
     if (!project) {
       throw new ForbiddenException("Project not found");
     }
