@@ -43,12 +43,12 @@ const get = async (
   return await axiosInstance
     .get(url, config)
     .then((response) => {
-      if (response.data.status >= 200 && response.data.status < 400) {
-        getData.status = response.data.status;
-        getData.data = response.data.data;
+      if (response.status >= 200 && response.status < 400) {
+        getData.status = response.status;
+        getData.data = response.data;
         return getData;
       } else {
-        throw new Error();
+        throw new Error("API request failed");
       }
     })
     .catch((error) => {
@@ -68,12 +68,12 @@ const post = async (
   return await axiosInstance
     .post(url, data, config)
     .then((response) => {
-      if (response.data.status >= 200 && response.data.status < 400) {
-        getData.status = response.data.status;
-        getData.data = response.data.data;
+      if (response.status >= 200 && response.status < 400) {
+        getData.status = response.status;
+        getData.data = response.data;
         return getData;
       } else {
-        throw new Error();
+        throw new Error("API request failed");
       }
     })
     .catch((error) => {
@@ -94,12 +94,12 @@ const put = async (
   return await axiosInstance
     .put(url, data, config)
     .then((response) => {
-      if (response.data.status >= 200 && response.data.status < 400) {
-        getData.status = response.data.status;
-        getData.data = response.data.data;
+      if (response.status >= 200 && response.status < 400) {
+        getData.status = response.status;
+        getData.data = response.data;
         return getData;
       } else {
-        throw new Error();
+        throw new Error("API request failed");
       }
     })
     .catch((error) => {
@@ -118,12 +118,12 @@ const del = async (
   return await axiosInstance
     .delete(url, config)
     .then((response) => {
-      if (response.data.status >= 200 && response.data.status < 400) {
-        getData.status = response.data.status;
-        getData.data = response.data.data;
+      if (response.status >= 200 && response.status < 400) {
+        getData.status = response.status;
+        getData.data = response.data;
         return getData;
       } else {
-        throw new Error();
+        throw new Error("API request failed");
       }
     })
     .catch((error) => {

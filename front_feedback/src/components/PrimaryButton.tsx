@@ -17,7 +17,7 @@ const PrimaryButton = ({
   ...rest
 }: PrimaryButtonProps) => {
   const baseClasses =
-    "inline-block w-full rounded-lg px-6 py-3 font-semibold transition-colors text-center";
+    "inline-block w-full rounded-lg px-6 py-3 font-semibold transition-colors text-center whitespace-nowrap";
 
   const variants = {
     primary: "bg-primary text-black hover:bg-primary/80",
