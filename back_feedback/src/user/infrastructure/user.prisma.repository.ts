@@ -28,6 +28,7 @@ export class UserPrismaRepository implements IUserRepository {
     const prismaUser = await this.prisma.user.findUnique({
       where: {
         providerAccountId,
+        deletedAt: null,
       },
     });
     if (!prismaUser) return null;
@@ -50,11 +51,47 @@ export class UserPrismaRepository implements IUserRepository {
   }
 
   async deleteUser(providerAccountId: string) {
-    return await this.prisma.user.delete({
+    const prismaUser = await this.prisma.user.update({
+      where: {
+        providerAccountId,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+    return this.toDomain(prismaUser);
+  }
+
+  async findFirst(providerAccountId: string): Promise<User | null> {
+    const prismaUser = await this.prisma.user.findFirst({
       where: {
         providerAccountId,
       },
     });
+    if (!prismaUser) return null;
+    return this.toDomain(prismaUser);
+  }
+
+  async hardDeleteUser(providerAccountId: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { providerAccountId },
+    });
+    if (!user) return;
+
+    const projectIds = (
+      await this.prisma.project.findMany({
+        where: { userId: user.id },
+        select: { id: true },
+      })
+    ).map((p) => p.id);
+
+    await this.prisma.$transaction([
+      this.prisma.feedback.deleteMany({
+        where: { projectId: { in: projectIds } },
+      }),
+      this.prisma.project.deleteMany({ where: { userId: user.id } }),
+      this.prisma.user.delete({ where: { providerAccountId } }),
+    ]);
   }
 
   private toDomain(prismaUser: PrismaUser): User {

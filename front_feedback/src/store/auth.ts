@@ -1,7 +1,7 @@
 // store/auth.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { logout } from "@/services/authService";
+import { logout, withdraw as withdrawService } from "@/services/authService";
 
 interface User {
   id: string;
@@ -12,6 +12,7 @@ interface AuthState {
   user: User | null;
   setUser: (user: User) => void;
   logout: () => Promise<void>;
+  withdraw: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -26,6 +27,15 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           console.error("Logout failed", error);
           set({ user: null });
+        }
+      },
+      withdraw: async () => {
+        try {
+          await withdrawService();
+          set({ user: null });
+        } catch (error) {
+          console.error("Withdraw failed", error);
+          throw error;
         }
       },
     }),

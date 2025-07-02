@@ -2,10 +2,20 @@ import { get } from "@/api";
 
 export const logout = async () => {
   try {
-    const res = await get("/auth/logout");
-    return res;
+    const response = await get("/auth/logout");
+    return response.data;
   } catch (error) {
-    console.error("Error logging out:", error);
+    console.error("Logout failed:", error);
+    throw error;
+  }
+};
+
+export const withdraw = async () => {
+  try {
+    const response = await get("/auth/withdraw");
+    return response.data;
+  } catch (error) {
+    console.error("Withdraw failed:", error);
     throw error;
   }
 };

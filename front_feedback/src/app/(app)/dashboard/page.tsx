@@ -128,7 +128,6 @@ export default function DashboardPage() {
       );
     } catch (err: any) {
       console.error("Failed to delete project:", err);
-      // You might want to show a toast notification for the error
     } finally {
       setIsDeleteModalOpen(false);
       setDeletingProjectId(null);
@@ -287,31 +286,32 @@ export default function DashboardPage() {
       )}
 
       {/* Delete Confirmation Modal */}
-      {isDeleteModalOpen && (
-        <Modal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-        >
-          <div className="space-y-6 text-center">
-            <h2 className="text-2xl font-bold text-gray-800">Delete Project</h2>
-            <p className="text-gray-600">
-              Are you sure you want to delete this project? This action cannot
-              be undone.
-            </p>
-            <div className="flex justify-center space-x-4">
-              <PrimaryButton
-                onClick={() => setIsDeleteModalOpen(false)}
-                variant="grey"
-              >
-                Cancel
-              </PrimaryButton>
-              <PrimaryButton onClick={handleConfirmDelete} variant="primary">
-                Delete
-              </PrimaryButton>
-            </div>
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+      >
+        <div className="space-y-6 text-center">
+          <h2 className="text-2xl font-bold text-gray-800">Delete Project</h2>
+          <p className="text-gray-600">
+            Are you sure you want to delete this project? This action cannot be
+            undone.
+          </p>
+          <div className="flex justify-center space-x-4">
+            <PrimaryButton
+              onClick={() => setIsDeleteModalOpen(false)}
+              variant="grey"
+            >
+              Cancel
+            </PrimaryButton>
+            <PrimaryButton
+              onClick={handleConfirmDelete}
+              className="!bg-red-600 hover:!bg-red-700"
+            >
+              Delete
+            </PrimaryButton>
           </div>
-        </Modal>
-      )}
+        </div>
+      </Modal>
     </>
   );
 }

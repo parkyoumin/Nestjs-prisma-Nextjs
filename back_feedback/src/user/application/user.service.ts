@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Inject } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  ConflictException,
+} from "@nestjs/common";
 import { CreateUser } from "src/types/user.type";
 import { IUserRepository } from "../domain/user.repository";
 import { User } from "../domain/user.entity";
@@ -10,14 +15,22 @@ export class UserService {
     private readonly userRepository: IUserRepository,
   ) {}
 
-  async createUser(createUser: CreateUser) {
-    const user: User = await this.userRepository.createUser(createUser);
+  async createUser(createUser: CreateUser): Promise<User> {
+    const existingUser = await this.userRepository.findFirst(
+      createUser.providerAccountId,
+    );
 
-    if (!user) {
-      throw new NotFoundException("User not found");
+    if (existingUser) {
+      if (existingUser.deletedAt) {
+        // Soft-deleted user exists, hard-delete them before creating a new one.
+        await this.userRepository.hardDeleteUser(createUser.providerAccountId);
+      } else {
+        // Active user already exists.
+        throw new ConflictException("User already exists.");
+      }
     }
 
-    return user;
+    return this.userRepository.createUser(createUser);
   }
 
   async isUserByProviderAccountId(providerAccountId: string) {

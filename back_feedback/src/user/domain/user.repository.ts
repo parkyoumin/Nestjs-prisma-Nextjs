@@ -8,5 +8,9 @@ export interface IUserRepository {
     providerAccountId: string,
     refreshToken: string,
   ): Promise<User>;
-  deleteUser(providerAccountId: string): Promise<any>;
+  deleteUser(providerAccountId: string): Promise<User>;
+  findFirst(providerAccountId: string): Promise<User | null>;
+  hardDeleteUser(providerAccountId: string): Promise<void>;
 }
+
+export const IUserRepository = Symbol("IUserRepository");
