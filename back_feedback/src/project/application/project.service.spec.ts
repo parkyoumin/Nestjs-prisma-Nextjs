@@ -2,28 +2,39 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { ProjectService } from "./project.service";
 import { IProjectRepository } from "../domain/project.repository";
 import { Project } from "../domain/project.entity";
+import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { CreateProjectDto, UpdateProjectDto } from "src/types/project.type";
-import { ForbiddenException } from "@nestjs/common";
-
-const mockProjectRepository = {
-  createProject: jest.fn(),
-  updateProject: jest.fn(),
-  findById: jest.fn(),
-  deleteProject: jest.fn(),
-  getProjects: jest.fn(),
-};
 
 describe("ProjectService", () => {
   let service: ProjectService;
   let repository: jest.Mocked<IProjectRepository>;
 
+  const mockProject = new Project({
+    id: "project-id-1",
+    title: "Test Project",
+    userId: BigInt(1),
+    createdAt: new Date(),
+    deletedAt: null,
+    feedbackCount: 0,
+    feedbacks: [],
+  });
+
   beforeEach(async () => {
+    const mockRepository = {
+      createProject: jest.fn(),
+      updateProject: jest.fn(),
+      deleteProject: jest.fn(),
+      getProjects: jest.fn(),
+      findById: jest.fn(),
+      findProjectWithFeedbacks: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProjectService,
         {
           provide: IProjectRepository,
-          useValue: mockProjectRepository,
+          useValue: mockRepository,
         },
       ],
     }).compile();
@@ -32,101 +43,118 @@ describe("ProjectService", () => {
     repository = module.get(IProjectRepository);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("should be defined", () => {
     expect(service).toBeDefined();
   });
 
   describe("createProject", () => {
-    it("새로운 프로젝트를 성공적으로 생성해야 한다", async () => {
+    it("should create a new project successfully", async () => {
       // Given
-      const createDto: CreateProjectDto = {
-        title: "New Test Project",
+      const createData: CreateProjectDto = {
+        title: "New Project",
         userId: BigInt(1),
       };
-      const expectedProject = new Project({
-        id: "new-uuid",
-        title: createDto.title,
-        userId: createDto.userId,
-        createdAt: new Date(),
-        deletedAt: null,
-        feedbackCount: 0,
-        feedbacks: [],
-      });
-
-      repository.createProject.mockResolvedValue(expectedProject);
+      repository.createProject.mockResolvedValue(mockProject);
 
       // When
-      const result = await service.createProject(createDto);
+      const result = await service.createProject(createData);
 
       // Then
-      expect(result).toEqual(expectedProject);
-      expect(repository.createProject).toHaveBeenCalledTimes(1);
-      expect(repository.createProject).toHaveBeenCalledWith(createDto);
+      expect(result).toEqual(mockProject);
+      expect(repository.createProject).toHaveBeenCalledWith(createData);
     });
   });
 
   describe("updateProject", () => {
-    const projectId = "some-uuid";
-    const updateDto: UpdateProjectDto = {
-      title: "Updated Project Title",
+    const projectId = "project-id-1";
+    const updateData: UpdateProjectDto = {
+      title: "Updated Title",
       userId: BigInt(1),
     };
 
-    it("프로젝트를 성공적으로 수정해야 한다", async () => {
+    it("should update a project successfully", async () => {
       // Given
-      const expectedProject = new Project({
-        id: projectId,
-        title: updateDto.title,
-        userId: updateDto.userId,
-        createdAt: new Date(),
-        deletedAt: null,
-        feedbackCount: 0,
-        feedbacks: [],
+      repository.findById.mockResolvedValue({
+        ...mockProject,
+        userId: updateData.userId,
+      });
+      repository.updateProject.mockResolvedValue({
+        ...mockProject,
+        ...updateData,
       });
 
-      repository.updateProject.mockResolvedValue(expectedProject);
-
       // When
-      const result = await service.updateProject(projectId, updateDto);
+      const result = await service.updateProject(projectId, updateData);
 
       // Then
-      expect(result).toEqual(expectedProject);
-      expect(repository.updateProject).toHaveBeenCalledTimes(1);
+      expect(repository.findById).toHaveBeenCalledWith(projectId);
       expect(repository.updateProject).toHaveBeenCalledWith(
         projectId,
-        updateDto,
+        updateData,
       );
+      expect(result.title).toEqual(updateData.title);
     });
 
-    it("프로젝트가 없거나 권한이 없으면 ForbiddenException을 던져야 한다", async () => {
+    it("should throw NotFoundException if project not found", async () => {
       // Given
-      repository.updateProject.mockResolvedValue(null);
+      repository.findById.mockResolvedValue(null);
 
       // When & Then
-      await expect(service.updateProject(projectId, updateDto)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.updateProject(projectId, updateData),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it("should throw ForbiddenException if user does not have permission", async () => {
+      // Given
+      const anotherUsersId = BigInt(2);
+      repository.findById.mockResolvedValue({
+        ...mockProject,
+        userId: anotherUsersId,
+      });
+
+      // When & Then
+      await expect(
+        service.updateProject(projectId, updateData),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
   describe("deleteProject", () => {
-    const projectId = "some-uuid";
+    const projectId = "project-id-1";
     const userId = BigInt(1);
 
-    it("프로젝트를 성공적으로 삭제해야 한다", async () => {
+    it("should delete a project successfully", async () => {
       // Given
-      repository.deleteProject.mockResolvedValue(true);
+      repository.findById.mockResolvedValue(mockProject);
+      repository.deleteProject.mockResolvedValue(undefined);
 
       // When
       await service.deleteProject(projectId, userId);
 
       // Then
+      expect(repository.findById).toHaveBeenCalledWith(projectId);
       expect(repository.deleteProject).toHaveBeenCalledWith(projectId, userId);
     });
 
-    it("프로젝트가 없거나 권한이 없으면 ForbiddenException을 던져야 한다", async () => {
+    it("should throw NotFoundException if project not found", async () => {
       // Given
-      repository.deleteProject.mockResolvedValue(false);
+      repository.findById.mockResolvedValue(null);
+
+      // When & Then
+      await expect(service.deleteProject(projectId, userId)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it("should throw ForbiddenException if user does not have permission", async () => {
+      // Given
+      const anotherUsersProject = { ...mockProject, userId: BigInt(2) };
+      repository.findById.mockResolvedValue(anotherUsersProject);
 
       // When & Then
       await expect(service.deleteProject(projectId, userId)).rejects.toThrow(
@@ -135,64 +163,48 @@ describe("ProjectService", () => {
     });
   });
 
-  describe("findProjectWithFeedbacks", () => {
-    it("프로젝트와 피드백 목록을 성공적으로 조회해야 한다", async () => {
-      // Given
-      const projectId = "some-uuid";
-      const userId = BigInt(1);
-      const expectedProject = new Project({
-        id: projectId,
-        title: "Project 1",
-        userId,
-        createdAt: new Date(),
-        deletedAt: null,
-        feedbackCount: 120,
-        feedbacks: [],
-      });
+  describe("getProject", () => {
+    const projectId = "project-id-1";
+    const userId = BigInt(1);
 
-      repository.findProjectWithFeedbacks.mockResolvedValue(expectedProject);
+    it("should return a project with feedbacks", async () => {
+      // Given
+      repository.findProjectWithFeedbacks.mockResolvedValue(mockProject);
 
       // When
-      const result = await service.findProjectWithFeedbacks(projectId, userId);
+      const result = await service.getProject(projectId, userId);
 
       // Then
-      expect(result).toEqual(expectedProject);
+      expect(result).toEqual(mockProject);
       expect(repository.findProjectWithFeedbacks).toHaveBeenCalledWith(
         projectId,
         userId,
       );
     });
+
+    it("should throw NotFoundException if project not found", async () => {
+      // Given
+      repository.findProjectWithFeedbacks.mockResolvedValue(null);
+
+      // When & Then
+      await expect(service.getProject(projectId, userId)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
   });
 
   describe("getProjects", () => {
-    it("사용자의 모든 프로젝트 목록과 피드백 개수를 반환해야 한다", async () => {
+    it("should return a list of projects for a user", async () => {
       // Given
       const userId = BigInt(1);
-      const expectedProjects: Project[] = [
-        {
-          id: "uuid-1",
-          title: "Project 1",
-          userId,
-          createdAt: new Date(),
-          deletedAt: null,
-          feedbackCount: 120,
-        },
-        {
-          id: "uuid-2",
-          title: "Project 2",
-          userId,
-          createdAt: new Date(),
-          deletedAt: null,
-          feedbackCount: 85,
-        },
-      ];
-      repository.getProjects.mockResolvedValue(expectedProjects);
+      const projects = [mockProject];
+      repository.getProjects.mockResolvedValue(projects);
 
       // When
       const result = await service.getProjects(userId);
 
       // Then
-      expect(result).toEqual(expectedProjects);
+      expect(result).toEqual(projects);
       expect(repository.getProjects).toHaveBeenCalledWith(userId);
     });
   });

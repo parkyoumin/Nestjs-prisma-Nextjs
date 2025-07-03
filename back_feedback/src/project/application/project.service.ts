@@ -1,4 +1,9 @@
-import { ForbiddenException, Inject, Injectable } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { IProjectRepository } from "../domain/project.repository";
 import { Project } from "../domain/project.entity";
 import { CreateProjectDto, UpdateProjectDto } from "src/types/project.type";
@@ -18,18 +23,25 @@ export class ProjectService {
     id: string,
     updateDto: UpdateProjectDto,
   ): Promise<Project> {
-    const project = await this.projectRepository.updateProject(id, updateDto);
+    const project = await this.projectRepository.findById(id);
     if (!project) {
-      throw new ForbiddenException("Project not found or access denied.");
+      throw new NotFoundException("Project not found.");
     }
-    return project;
+    if (project.userId !== updateDto.userId) {
+      throw new ForbiddenException("You don't have permission to update.");
+    }
+    return this.projectRepository.updateProject(id, updateDto);
   }
 
   async deleteProject(id: string, userId: bigint): Promise<void> {
-    const isSuccess = await this.projectRepository.deleteProject(id, userId);
-    if (!isSuccess) {
-      throw new ForbiddenException("Project not found or access denied.");
+    const project = await this.projectRepository.findById(id);
+    if (!project) {
+      throw new NotFoundException("Project not found.");
     }
+    if (project.userId !== userId) {
+      throw new ForbiddenException("You don't have permission to delete.");
+    }
+    await this.projectRepository.deleteProject(id, userId);
   }
 
   async findProjectWithFeedbacks(id: string, userId: bigint): Promise<Project> {
@@ -45,5 +57,16 @@ export class ProjectService {
 
   async getProjects(userId: bigint): Promise<Project[]> {
     return this.projectRepository.getProjects(userId);
+  }
+
+  async getProject(id: string, userId: bigint): Promise<Project> {
+    const project = await this.projectRepository.findProjectWithFeedbacks(
+      id,
+      userId,
+    );
+    if (!project) {
+      throw new NotFoundException("Project not found.");
+    }
+    return project;
   }
 }
