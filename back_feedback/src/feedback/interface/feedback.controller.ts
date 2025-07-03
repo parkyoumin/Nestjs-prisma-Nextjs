@@ -1,13 +1,11 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Param,
   Delete,
   UseGuards,
   Req,
-  Query,
   ParseIntPipe,
 } from "@nestjs/common";
 import { SkipThrottle, Throttle } from "@nestjs/throttler";
@@ -28,23 +26,17 @@ export class FeedbackController {
 
   @SkipThrottle()
   @UseGuards(JwtAuthGuard)
-  @Get()
-  findAllByProjectId(
-    @Query("projectId") projectId: string,
-    @Req() req: AuthenticatedRequest,
-  ) {
-    const { user } = req;
-    return this.feedbackService.getFeedbacksByProjectId(projectId, user.id);
-  }
-
-  @SkipThrottle()
-  @UseGuards(JwtAuthGuard)
   @Delete(":id")
   remove(
     @Param("id", ParseIntPipe) id: number,
+    @Param("projectId") projectId: string,
     @Req() req: AuthenticatedRequest,
   ) {
     const { user } = req;
-    return this.feedbackService.deleteFeedback(id, user.id);
+    return this.feedbackService.deleteFeedback({
+      id,
+      projectId,
+      userId: user.id,
+    });
   }
 }
