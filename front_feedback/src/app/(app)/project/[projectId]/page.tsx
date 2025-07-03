@@ -223,12 +223,18 @@ const FeedbackDeleteConfirm = ({
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
-      await deleteFeedback(projectId, feedbackId);
-      onSuccess();
+      const response = await deleteFeedback(projectId, feedbackId);
+      if (response.success) {
+        onSuccess();
+      } else {
+        console.error("Failed to delete feedback:", response.message);
+      }
       closeModal();
     } catch (err) {
       console.error("Failed to delete feedback:", err);
       closeModal();
+    } finally {
+      setIsDeleting(false);
     }
   };
 

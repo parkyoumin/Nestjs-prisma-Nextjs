@@ -21,20 +21,22 @@ export class FeedbackController {
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post()
-  create(@Body() createFeedbackDto: CreateFeedbackDto) {
-    return this.feedbackService.createFeedback(createFeedbackDto);
+  async createFeedback(@Body() createFeedbackDto: CreateFeedbackDto) {
+    const feedback =
+      await this.feedbackService.createFeedback(createFeedbackDto);
+    return { createdId: feedback.id };
   }
 
   @SkipThrottle()
   @UseGuards(JwtAuthGuard)
   @Delete(":id")
-  remove(
+  async deleteFeedback(
     @Param("id", ParseIntPipe) id: number,
     @Query("projectId") projectId: string,
     @Req() req: AuthenticatedRequest,
   ) {
     const { user } = req;
-    return this.feedbackService.deleteFeedback({
+    await this.feedbackService.deleteFeedback({
       id,
       projectId,
       userId: user.id,
