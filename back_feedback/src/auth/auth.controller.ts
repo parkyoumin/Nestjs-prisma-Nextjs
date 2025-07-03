@@ -12,6 +12,7 @@ import { UserService } from "src/user/application/user.service";
 import { AuthGuard } from "@nestjs/passport";
 import { GoogleUser } from "src/types/auth.type";
 import { CreateUser, User } from "src/types/user.type";
+import { BypassAuth } from "src/common/decorators/bypass-auth.decorator";
 
 @Controller("auth")
 export class AuthController {
@@ -21,10 +22,12 @@ export class AuthController {
   ) {}
 
   @Get("/google")
+  @BypassAuth()
   @UseGuards(AuthGuard("google"))
   async googleLogin() {}
 
   @Get("/google/callback")
+  @BypassAuth()
   @UseGuards(AuthGuard("google"))
   async googleLoginCallback(
     @Req() req,
