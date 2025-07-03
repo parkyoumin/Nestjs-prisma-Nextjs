@@ -1,5 +1,5 @@
-import axios, { AxiosRequestConfig } from "axios";
-import isEmpty from "@/utils/validator";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { UnifiedResponse } from "@/types/api";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const axiosInstance = axios.create({
@@ -11,140 +11,76 @@ const axiosPublicInstance = axios.create({
   baseURL: apiUrl,
 });
 
-export interface CommonResponse {
-  status: number;
-  data: any;
-}
-
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response.status === 401 && typeof window !== "undefined") {
+    if (error.response?.status === 401 && typeof window !== "undefined") {
       try {
-        const refreshResponse = await get("/auth/refresh");
-
-        switch (refreshResponse.status) {
-          case 200:
-            return axiosInstance(error.config);
-          default:
-            window.location.href = "/have-to-login";
-            break;
-        }
-      } catch (error) {
-        console.error(error);
+        await post("/auth/refresh");
+        return axiosInstance(error.config);
+      } catch (refreshError) {
+        console.error(
+          "Token refresh failed, redirecting to login.",
+          refreshError,
+        );
+        window.location.href = "/have-to-login";
+        return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
   },
 );
 
-const get = async (
+async function handleRequest<T>(
+  request: Promise<AxiosResponse<UnifiedResponse<T>>>,
+): Promise<UnifiedResponse<T>> {
+  try {
+    const response = await request;
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return Promise.reject(error.response.data);
+    }
+    return Promise.reject(error);
+  }
+}
+
+const get = <T>(
   url: string,
   config?: AxiosRequestConfig,
-): Promise<CommonResponse> => {
-  const getData: CommonResponse = { status: 0, data: {} };
-  return await axiosInstance
-    .get(url, config)
-    .then((response) => {
-      if (response.status >= 200 && response.status < 400) {
-        getData.status = response.status;
-        getData.data = response.data;
-        return getData;
-      } else {
-        throw new Error("API request failed");
-      }
-    })
-    .catch((error) => {
-      return Promise.reject(error);
-    });
+): Promise<UnifiedResponse<T>> => {
+  return handleRequest(axiosInstance.get(url, config));
 };
 
-const post = async (
+const post = <T>(
   url: string,
   data?: any,
   config?: AxiosRequestConfig,
-): Promise<CommonResponse> => {
-  const getData: CommonResponse = { status: 0, data: {} };
-  return await axiosInstance
-    .post(url, data, config)
-    .then((response) => {
-      if (response.status >= 200 && response.status < 400) {
-        getData.status = response.status;
-        getData.data = response.data;
-        return getData;
-      } else {
-        throw new Error("API request failed");
-      }
-    })
-    .catch((error) => {
-      return Promise.reject(error);
-    });
+): Promise<UnifiedResponse<T>> => {
+  return handleRequest(axiosInstance.post(url, data, config));
 };
 
-const publicPost = async (
+const publicPost = <T>(
   url: string,
   data?: any,
   config?: AxiosRequestConfig,
-): Promise<CommonResponse> => {
-  const getData: CommonResponse = { status: 0, data: {} };
-  return await axiosPublicInstance
-    .post(url, data, config)
-    .then((response) => {
-      if (response.status >= 200 && response.status < 400) {
-        getData.status = response.status;
-        getData.data = response.data;
-        return getData;
-      } else {
-        throw new Error("API request failed");
-      }
-    })
-    .catch((error) => {
-      return Promise.reject(error);
-    });
+): Promise<UnifiedResponse<T>> => {
+  return handleRequest(axiosPublicInstance.post(url, data, config));
 };
 
-const put = async (
+const put = <T>(
   url: string,
   data?: any,
   config?: AxiosRequestConfig,
-): Promise<CommonResponse> => {
-  const getData: CommonResponse = { status: 0, data: {} };
-  return await axiosInstance
-    .put(url, data, config)
-    .then((response) => {
-      if (response.status >= 200 && response.status < 400) {
-        getData.status = response.status;
-        getData.data = response.data;
-        return getData;
-      } else {
-        throw new Error("API request failed");
-      }
-    })
-    .catch((error) => {
-      return Promise.reject(error);
-    });
+): Promise<UnifiedResponse<T>> => {
+  return handleRequest(axiosInstance.put(url, data, config));
 };
 
-const del = async (
+const del = <T>(
   url: string,
   config?: AxiosRequestConfig,
-): Promise<CommonResponse> => {
-  const getData: CommonResponse = { status: 0, data: {} };
-  return await axiosInstance
-    .delete(url, config)
-    .then((response) => {
-      if (response.status >= 200 && response.status < 400) {
-        getData.status = response.status;
-        getData.data = response.data;
-        return getData;
-      } else {
-        throw new Error("API request failed");
-      }
-    })
-    .catch((error) => {
-      return Promise.reject(error);
-    });
+): Promise<UnifiedResponse<T>> => {
+  return handleRequest(axiosInstance.delete(url, config));
 };
 
 export { get, post, publicPost, put, del };

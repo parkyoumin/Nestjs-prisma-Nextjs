@@ -118,13 +118,6 @@ export class AuthController {
       sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     });
-
-    return {
-      status: 200,
-      data: {
-        message: "refresh access token success",
-      },
-    };
   }
 
   @Get("/logout")
@@ -153,13 +146,6 @@ export class AuthController {
       secure: false,
       sameSite: "lax",
     });
-
-    return {
-      status: 200,
-      data: {
-        message: "logout success",
-      },
-    };
   }
 
   @Get("/withdraw")
@@ -191,12 +177,5 @@ export class AuthController {
       secure: false,
       sameSite: "lax",
     });
-
-    return {
-      status: 200,
-      data: {
-        message: "logout success",
-      },
-    };
   }
 }
