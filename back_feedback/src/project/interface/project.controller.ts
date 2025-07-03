@@ -72,12 +72,12 @@ export class ProjectController {
   }
 
   @Get(":id")
-  async findProjectWithFeedbacks(
+  async getProjectWithFeedbacks(
     @Param("id") id: string,
     @Req() req: AuthenticatedRequest,
   ) {
     const { user } = req;
-    return this.projectService.findProjectWithFeedbacks(id, user.id);
+    return this.projectService.getProjectWithFeedbacks(id, user.id);
   }
 
   @Get()

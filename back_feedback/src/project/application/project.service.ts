@@ -44,8 +44,8 @@ export class ProjectService {
     await this.projectRepository.deleteProject(id, userId);
   }
 
-  async findProjectWithFeedbacks(id: string, userId: bigint): Promise<Project> {
-    const project = await this.projectRepository.findProjectWithFeedbacks(
+  async getProjectWithFeedbacks(id: string, userId: bigint): Promise<Project> {
+    const project = await this.projectRepository.getProjectWithFeedbacks(
       id,
       userId,
     );

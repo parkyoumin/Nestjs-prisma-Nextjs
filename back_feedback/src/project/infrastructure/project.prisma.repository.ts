@@ -53,7 +53,7 @@ export class ProjectPrismaRepository implements IProjectRepository {
     });
   }
 
-  async findProjectWithFeedbacks(
+  async getProjectWithFeedbacks(
     id: string,
     userId: bigint,
   ): Promise<Project | null> {

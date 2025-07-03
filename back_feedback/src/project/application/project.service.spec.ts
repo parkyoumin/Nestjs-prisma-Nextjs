@@ -26,7 +26,7 @@ describe("ProjectService", () => {
       deleteProject: jest.fn(),
       getProjects: jest.fn(),
       findById: jest.fn(),
-      findProjectWithFeedbacks: jest.fn(),
+      getProjectWithFeedbacks: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
