@@ -1,3 +1,5 @@
+import { Feedback } from "./feedback";
+
 export interface Project {
   id: string;
   title: string;
@@ -5,4 +7,5 @@ export interface Project {
   createdAt: string;
   deletedAt: string | null;
   feedbackCount?: number;
+  feedbacks?: Feedback[];
 }

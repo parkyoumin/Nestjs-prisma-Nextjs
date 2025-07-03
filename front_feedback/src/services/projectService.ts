@@ -8,6 +8,11 @@ export const getProjects = async (): Promise<Project[]> => {
   return response.data;
 };
 
+export const getProject = async (id: string): Promise<Project> => {
+  const response = await get(`/project/${id}`);
+  return response.data;
+};
+
 export const createProject = async (title: string): Promise<Project> => {
   if (!title.trim()) {
     throw new Error("Project title cannot be empty.");
