@@ -7,6 +7,7 @@ import {
   UseGuards,
   Req,
   ParseIntPipe,
+  Query,
 } from "@nestjs/common";
 import { SkipThrottle, Throttle } from "@nestjs/throttler";
 import { FeedbackService } from "../application/feedback.service";
@@ -29,7 +30,7 @@ export class FeedbackController {
   @Delete(":id")
   remove(
     @Param("id", ParseIntPipe) id: number,
-    @Param("projectId") projectId: string,
+    @Query("projectId") projectId: string,
     @Req() req: AuthenticatedRequest,
   ) {
     const { user } = req;

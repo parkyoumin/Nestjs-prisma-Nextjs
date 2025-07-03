@@ -1,6 +1,6 @@
 export interface Feedback {
-  id: string;
-  content: string;
+  id: number;
+  message: string;
   projectId: string;
   createdAt: string;
 }

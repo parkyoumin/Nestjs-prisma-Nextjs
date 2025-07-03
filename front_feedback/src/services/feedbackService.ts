@@ -8,6 +8,13 @@ export const createFeedback = async (projectId: string, content: string) => {
   return response.data;
 };
 
-export const deleteFeedback = async (id: string): Promise<void> => {
-  await del(`/feedback/${id}`);
+export const deleteFeedback = async (
+  projectId: string,
+  id: number,
+): Promise<void> => {
+  await del(`/feedback/${id}`, {
+    params: {
+      projectId,
+    },
+  });
 };

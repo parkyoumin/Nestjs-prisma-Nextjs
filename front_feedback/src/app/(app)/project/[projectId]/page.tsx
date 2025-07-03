@@ -8,6 +8,8 @@ import { deleteFeedback } from "@/services/feedbackService";
 import { Project } from "@/types/project";
 import { Feedback } from "@/types/feedback";
 import { useAuthStore } from "@/store/auth";
+import PrimaryButton from "@/components/PrimaryButton";
+import { useModal } from "@/hooks/useModal";
 
 type FeedbackWithStatus = Feedback & { isChecked: boolean };
 
@@ -15,6 +17,7 @@ const ProjectDetailPage = () => {
   const params = useParams();
   const projectId = params.projectId as string;
   const { user } = useAuthStore();
+  const { openModal, closeModal } = useModal();
 
   const [project, setProject] = useState<Project | null>(null);
   const [feedbacks, setFeedbacks] = useState<FeedbackWithStatus[]>([]);
@@ -26,6 +29,7 @@ const ProjectDetailPage = () => {
         try {
           setLoading(true);
           const projectData = await getProject(projectId);
+          console.log(projectData);
           setProject(projectData);
           if (projectData.feedbacks) {
             setFeedbacks(
@@ -49,7 +53,7 @@ const ProjectDetailPage = () => {
     }
   }, [projectId, user]);
 
-  const handleToggleCheck = (feedbackId: string) => {
+  const handleToggleCheck = (feedbackId: number) => {
     setFeedbacks(
       feedbacks.map((f) =>
         f.id === feedbackId ? { ...f, isChecked: !f.isChecked } : f,
@@ -57,15 +61,16 @@ const ProjectDetailPage = () => {
     );
   };
 
-  const handleDeleteFeedback = async (feedbackId: string) => {
-    if (window.confirm("Are you sure you want to delete this feedback?")) {
-      try {
-        await deleteFeedback(feedbackId);
-        setFeedbacks(feedbacks.filter((f) => f.id !== feedbackId));
-      } catch (error) {
-        console.error("Failed to delete feedback", error);
-      }
-    }
+  const openDeleteConfirmModal = (feedbackId: number) => {
+    openModal(
+      <FeedbackDeleteConfirm
+        projectId={projectId}
+        feedbackId={feedbackId}
+        onSuccess={() => {
+          setFeedbacks((prev) => prev.filter((f) => f.id !== feedbackId));
+        }}
+      />,
+    );
   };
 
   if (loading) {
@@ -180,13 +185,13 @@ const ProjectDetailPage = () => {
                           : "text-gray-700"
                       }`}
                     >
-                      {feedback.content}
+                      {feedback.message}
                     </p>
                     <p className="mt-2 text-sm text-gray-500">Anonymous</p>
                   </div>
                 </div>
                 <button
-                  onClick={() => handleDeleteFeedback(feedback.id)}
+                  onClick={() => openDeleteConfirmModal(feedback.id)}
                   className="rounded-md bg-white py-1 px-2.5 text-sm font-semibold text-gray-700 opacity-0 shadow-sm ring-1 ring-inset ring-gray-300 transition-all duration-150 ease-in-out hover:bg-gray-50 group-hover:opacity-100"
                   aria-label="Delete feedback"
                 >
@@ -198,6 +203,58 @@ const ProjectDetailPage = () => {
         )}
       </div>
     </main>
+  );
+};
+
+// Delete Confirmation
+const FeedbackDeleteConfirm = ({
+  projectId,
+  feedbackId,
+  onSuccess,
+}: {
+  projectId: string;
+  feedbackId: number;
+  onSuccess: () => void;
+}) => {
+  const { closeModal } = useModal();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteFeedback(projectId, feedbackId);
+      onSuccess();
+      closeModal();
+    } catch (err) {
+      console.error("Failed to delete feedback:", err);
+      closeModal();
+    }
+  };
+
+  return (
+    <div className="space-y-6 text-center">
+      <h2 className="text-2xl font-bold text-gray-800">Confirm Deletion</h2>
+      <p className="text-base text-gray-700">
+        Are you sure you want to delete this feedback? This action cannot be
+        undone.
+      </p>
+      <div className="flex justify-center space-x-4 pt-4">
+        <PrimaryButton
+          onClick={closeModal}
+          variant="grey"
+          disabled={isDeleting}
+        >
+          Cancel
+        </PrimaryButton>
+        <PrimaryButton
+          onClick={handleConfirmDelete}
+          variant="danger"
+          disabled={isDeleting}
+        >
+          {isDeleting ? "Deleting..." : "Delete"}
+        </PrimaryButton>
+      </div>
+    </div>
   );
 };
 
