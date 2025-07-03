@@ -1,20 +1,14 @@
 import { Controller, Get, Req, UseGuards } from "@nestjs/common";
-import { UserService } from "../application/user.service";
-import { AuthGuard } from "@nestjs/passport";
 import { Request } from "express";
+import { JwtAuthGuard } from "src/auth/jwt/jwt.guard";
 
 @Controller("user")
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor() {}
 
   @Get()
-  @UseGuards(AuthGuard("jwt"))
+  @UseGuards(JwtAuthGuard)
   async findUserByProviderAccountId(@Req() req: Request) {
-    const user = req.user;
-
-    return {
-      status: 200,
-      data: user,
-    };
+    return req.user;
   }
 }
