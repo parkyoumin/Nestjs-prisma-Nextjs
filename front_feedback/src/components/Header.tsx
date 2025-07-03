@@ -11,7 +11,6 @@ import Modal from "./Modal";
 const Header = () => {
   const { user, logout, withdraw } = useAuthStore();
   const router = useRouter();
-  const loginUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -65,7 +64,10 @@ const Header = () => {
                 </div>
               </div>
             ) : (
-              <PrimaryButton href={loginUrl} className="!w-auto !px-4 !py-2">
+              <PrimaryButton
+                href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google`}
+                className="!w-auto !px-4 !py-2"
+              >
                 Get started
               </PrimaryButton>
             )}

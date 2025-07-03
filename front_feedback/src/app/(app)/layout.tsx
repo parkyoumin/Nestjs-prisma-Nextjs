@@ -1,16 +1,11 @@
-import type { Metadata } from "next";
 import Header from "@/components/Header";
 
-export const metadata: Metadata = {
-  title: "Feedback Central",
-  description: "Collect user feedback in one place",
+export const metadata = {
+  title: "Feedback",
+  description: "Feedback service",
 };
 
-export default function AppLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-full flex-col">
       <Header />

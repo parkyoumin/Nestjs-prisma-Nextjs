@@ -1,15 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import {
-  Link as LinkIcon,
-  MoreVertical,
-  EllipsisVerticalIcon,
-} from "lucide-react";
+import { Link as LinkIcon, MoreVertical } from "lucide-react";
 import { Project } from "@/types/project";
 import PrimaryButton from "./PrimaryButton";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/useToast";
 
 interface ProjectCardProps {
   project: Project;
@@ -22,8 +19,9 @@ export default function ProjectCard({
   onEdit,
   onDelete,
 }: ProjectCardProps) {
+  const { addToast } = useToast();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const router = useRouter();
+
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleMenuToggle = (e: React.MouseEvent) => {
@@ -65,7 +63,7 @@ export default function ProjectCard({
     const encodedProjectName = encodeURIComponent(project.title);
     const url = `${window.location.origin}/feedback/${project.id}?name=${encodedProjectName}`;
     navigator.clipboard.writeText(url);
-    alert("Link copied!");
+    addToast({ message: "Link copied!", type: "success" });
   };
 
   return (

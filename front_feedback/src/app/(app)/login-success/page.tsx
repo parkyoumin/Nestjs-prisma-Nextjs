@@ -14,12 +14,11 @@ export default function LoginSuccessPage() {
     const fetchUser = async () => {
       try {
         const res = await getUser();
-
         setUser({ id: res.data.id, email: res.data.email });
-        router.replace("/dashboard");
+        router.push("/dashboard");
       } catch (e) {
         console.error(e);
-        router.replace("/");
+        router.push("/");
       }
     };
 

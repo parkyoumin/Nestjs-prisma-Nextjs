@@ -2,6 +2,8 @@
 
 import { createFeedback } from "@/services/feedbackService";
 import { useState } from "react";
+import { useToast } from "@/hooks/useToast";
+import PrimaryButton from "@/components/PrimaryButton";
 
 interface FeedbackPageProps {
   params: {
@@ -21,24 +23,28 @@ export default function FeedbackPage({
     ? decodeURIComponent(searchParams.name)
     : "Sample Project Title";
 
+  const { addToast } = useToast();
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!content.trim()) {
-      setError("Feedback content cannot be empty.");
+      addToast({ message: "Feedback content cannot be empty.", type: "error" });
       return;
     }
     setIsSubmitting(true);
-    setError(null);
     try {
       await createFeedback(projectId, content);
-      alert("Feedback submitted successfully!");
+      addToast({
+        message: "Feedback submitted successfully!",
+        type: "success",
+      });
       setContent("");
     } catch (err) {
-      setError("Failed to submit feedback. Please try again.");
+      addToast({
+        message: "Failed to submit feedback. Please try again.",
+        type: "error",
+      });
       console.error(err);
     } finally {
       setIsSubmitting(false);
@@ -53,7 +59,7 @@ export default function FeedbackPage({
           We would love to hear your feedback for this project!
         </p>
 
-        <form onSubmit={handleSubmit}>
+        <div>
           <div className="space-y-4">
             <div>
               <label
@@ -75,18 +81,17 @@ export default function FeedbackPage({
               ></textarea>
             </div>
           </div>
-          {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
 
           <div className="mt-8">
-            <button
-              type="submit"
-              className="w-full rounded-lg bg-primary px-6 py-3 font-semibold text-black transition-colors hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-50"
+            <PrimaryButton
+              type="button"
+              onClick={handleSubmit}
               disabled={isSubmitting}
             >
               {isSubmitting ? "Submitting..." : "Submit Feedback"}
-            </button>
+            </PrimaryButton>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

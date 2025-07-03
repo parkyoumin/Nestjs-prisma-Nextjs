@@ -10,6 +10,15 @@ export const logout = async () => {
   }
 };
 
+export const refreshAccessToken = async () => {
+  try {
+    await get("/auth/refresh");
+  } catch (error) {
+    console.error("Failed to refresh access token:", error);
+    throw error;
+  }
+};
+
 export const withdraw = async () => {
   try {
     const response = await get("/auth/withdraw");

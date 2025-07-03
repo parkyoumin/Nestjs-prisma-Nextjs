@@ -28,9 +28,9 @@ const PrimaryButton = ({
 
   if (href) {
     return (
-      <Link href={href} className={combinedClasses}>
+      <a href={href} className={combinedClasses}>
         {children}
-      </Link>
+      </a>
     );
   }
 
