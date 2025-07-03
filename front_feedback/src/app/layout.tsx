@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/hooks/useToast";
+import { ModalProvider } from "@/hooks/useModal";
 
 const notoSansKR = Noto_Sans_KR({
   weight: ["300", "400", "500", "600", "700"],
@@ -21,7 +22,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full bg-white">
       <body className={`${notoSansKR.className} h-full`}>
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          <ModalProvider>{children}</ModalProvider>
+        </ToastProvider>
       </body>
     </html>
   );

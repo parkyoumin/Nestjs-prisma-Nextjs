@@ -6,7 +6,7 @@ interface PrimaryButtonProps
   children: React.ReactNode;
   href?: string;
   className?: string;
-  variant?: "primary" | "grey";
+  variant?: "primary" | "grey" | "danger";
 }
 
 const PrimaryButton = ({
@@ -22,6 +22,7 @@ const PrimaryButton = ({
   const variants = {
     primary: "bg-primary text-black hover:bg-primary/80",
     grey: "bg-gray-200 text-gray-700 hover:bg-gray-300",
+    danger: "bg-red-600 text-white hover:bg-red-700",
   };
 
   const combinedClasses = `${baseClasses} ${variants[variant]} ${className}`;
