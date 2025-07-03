@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateFeedbackDto {
   @IsString()
@@ -8,4 +8,18 @@ export class CreateFeedbackDto {
   @IsString()
   @IsNotEmpty()
   projectId: string;
+}
+
+export class DeleteFeedbackDto {
+  @IsNumber()
+  @IsNotEmpty()
+  id: number;
+
+  @IsString()
+  @IsNotEmpty()
+  projectId: string;
+
+  @BigInt()
+  @IsNotEmpty()
+  userId: bigint;
 }

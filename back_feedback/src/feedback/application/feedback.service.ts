@@ -1,7 +1,10 @@
 import { Injectable, Inject, ForbiddenException } from "@nestjs/common";
 import { IFeedbackRepository } from "../domain/feedback.repository";
 import { IProjectRepository } from "../../project/domain/project.repository";
-import { CreateFeedbackDto } from "../../types/feedback.type";
+import {
+  CreateFeedbackDto,
+  DeleteFeedbackDto,
+} from "../../types/feedback.type";
 
 @Injectable()
 export class FeedbackService {
@@ -22,37 +25,21 @@ export class FeedbackService {
     return this.feedbackRepository.createFeedback(createFeedbackDto);
   }
 
-  async getFeedbacksByProjectId(projectId: string, userId: bigint) {
-    const project = await this.projectRepository.findById(projectId);
-    if (!project) {
-      throw new ForbiddenException("Project not found");
-    }
-    if (project.userId !== userId) {
-      throw new ForbiddenException(
-        "You are not authorized to view these feedbacks",
-      );
-    }
-    return this.feedbackRepository.findFeedbacksByProjectId(projectId);
-  }
-
-  async deleteFeedback(id: number, userId: bigint) {
-    const feedback = await this.feedbackRepository.findFeedbackById(id);
-    if (!feedback) {
-      throw new ForbiddenException("Feedback not found");
-    }
-
-    const project = await this.projectRepository.findById(feedback.projectId);
+  async deleteFeedback(deleteFeedbackDto: DeleteFeedbackDto) {
+    const project = await this.projectRepository.findById(
+      deleteFeedbackDto.projectId,
+    );
 
     if (!project) {
       throw new ForbiddenException("Project not found");
     }
 
-    if (project.userId !== userId) {
+    if (project.userId !== deleteFeedbackDto.userId) {
       throw new ForbiddenException(
         "You are not authorized to delete this feedback",
       );
     }
 
-    await this.feedbackRepository.deleteFeedback(id);
+    await this.feedbackRepository.deleteFeedback(deleteFeedbackDto.id);
   }
 }

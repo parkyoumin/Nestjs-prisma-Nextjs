@@ -6,10 +6,6 @@ export interface IFeedbackRepository {
     projectId: string;
   }): Promise<Feedback>;
 
-  findFeedbacksByProjectId(projectId: string): Promise<Feedback[]>;
-
-  findFeedbackById(id: number): Promise<Feedback | null>;
-
   deleteFeedback(id: number): Promise<void>;
 }
 

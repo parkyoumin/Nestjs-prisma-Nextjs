@@ -30,8 +30,6 @@ describe("FeedbackService", () => {
       provide: IFeedbackRepository,
       useValue: {
         createFeedback: jest.fn(),
-        findFeedbacksByProjectId: jest.fn(),
-        findFeedbackById: jest.fn(),
         deleteFeedback: jest.fn(),
       },
     };
@@ -88,70 +86,33 @@ describe("FeedbackService", () => {
     });
   });
 
-  describe("getFeedbacksByProjectId", () => {
-    it("should return feedbacks if user is project owner", async () => {
+  describe("deleteFeedback", () => {
+    it("should delete feedback if project exists", async () => {
       mockProjectRepository.findById.mockResolvedValue(mockProject);
-      mockFeedbackRepository.findFeedbacksByProjectId.mockResolvedValue([
-        mockFeedback,
-      ]);
+      mockFeedbackRepository.deleteFeedback.mockResolvedValue(undefined);
 
-      const result = await service.getFeedbacksByProjectId(
-        "test-project-id",
-        BigInt(1),
-      );
+      await service.deleteFeedback({
+        id: 1,
+        projectId: "test-project-id",
+        userId: BigInt(1),
+      });
 
       expect(mockProjectRepository.findById).toHaveBeenCalledWith(
         "test-project-id",
       );
-      expect(result).toEqual([mockFeedback]);
+      expect(mockFeedbackRepository.deleteFeedback).toHaveBeenCalled();
     });
 
-    it("should throw ForbiddenException if user is not project owner", async () => {
-      mockProjectRepository.findById.mockResolvedValue(mockProject);
+    it("should throw ForbiddenException if project does not exist", async () => {
+      mockProjectRepository.findById.mockResolvedValue(null);
 
       await expect(
-        service.getFeedbacksByProjectId("test-project-id", BigInt(2)),
-      ).rejects.toThrow(
-        new ForbiddenException(
-          "You are not authorized to view these feedbacks",
-        ),
-      );
-    });
-  });
-
-  describe("deleteFeedback", () => {
-    it("should delete feedback if user is project owner", async () => {
-      // This is a bit tricky since our domain entity doesn't have a `project` property.
-      // The service will need to fetch both. Let's adjust the mock.
-      mockFeedbackRepository.findFeedbackById.mockResolvedValue(mockFeedback);
-      mockProjectRepository.findById.mockResolvedValue(mockProject); // Service will fetch project to check owner
-
-      await service.deleteFeedback(1, BigInt(1));
-
-      expect(mockFeedbackRepository.findFeedbackById).toHaveBeenCalledWith(1);
-      expect(mockProjectRepository.findById).toHaveBeenCalledWith(
-        mockFeedback.projectId,
-      );
-      expect(mockFeedbackRepository.deleteFeedback).toHaveBeenCalledWith(1);
-    });
-
-    it("should throw ForbiddenException if feedback not found", async () => {
-      mockFeedbackRepository.findFeedbackById.mockResolvedValue(null);
-
-      await expect(service.deleteFeedback(999, BigInt(1))).rejects.toThrow(
-        new ForbiddenException("Feedback not found"),
-      );
-    });
-
-    it("should throw ForbiddenException if user is not project owner", async () => {
-      mockFeedbackRepository.findFeedbackById.mockResolvedValue(mockFeedback);
-      mockProjectRepository.findById.mockResolvedValue(mockProject);
-
-      await expect(service.deleteFeedback(1, BigInt(2))).rejects.toThrow(
-        new ForbiddenException(
-          "You are not authorized to delete this feedback",
-        ),
-      );
+        service.deleteFeedback({
+          id: 1,
+          projectId: "non-existent-id",
+          userId: BigInt(1),
+        }),
+      ).rejects.toThrow(new ForbiddenException("Project not found"));
     });
   });
 });
