@@ -163,36 +163,6 @@ describe("ProjectService", () => {
     });
   });
 
-  describe("getProject", () => {
-    const projectId = "project-id-1";
-    const userId = BigInt(1);
-
-    it("should return a project with feedbacks", async () => {
-      // Given
-      repository.findProjectWithFeedbacks.mockResolvedValue(mockProject);
-
-      // When
-      const result = await service.getProject(projectId, userId);
-
-      // Then
-      expect(result).toEqual(mockProject);
-      expect(repository.findProjectWithFeedbacks).toHaveBeenCalledWith(
-        projectId,
-        userId,
-      );
-    });
-
-    it("should throw NotFoundException if project not found", async () => {
-      // Given
-      repository.findProjectWithFeedbacks.mockResolvedValue(null);
-
-      // When & Then
-      await expect(service.getProject(projectId, userId)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-  });
-
   describe("getProjects", () => {
     it("should return a list of projects for a user", async () => {
       // Given

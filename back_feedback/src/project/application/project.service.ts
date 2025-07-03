@@ -58,15 +58,4 @@ export class ProjectService {
   async getProjects(userId: bigint): Promise<Project[]> {
     return this.projectRepository.getProjects(userId);
   }
-
-  async getProject(id: string, userId: bigint): Promise<Project> {
-    const project = await this.projectRepository.findProjectWithFeedbacks(
-      id,
-      userId,
-    );
-    if (!project) {
-      throw new NotFoundException("Project not found.");
-    }
-    return project;
-  }
 }
