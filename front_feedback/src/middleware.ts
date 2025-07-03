@@ -6,10 +6,15 @@ export async function middleware(request: NextRequest) {
 
   // 미들웨어가 정적 파일, API 라우트 등 내부 요청을 가로채지 않도록 예외 처리
   if (
-    pathname.startsWith("/_next/") || // Next.js 빌드 결과물
-    pathname.startsWith("/api/") || // API 라우트
-    pathname.startsWith("/static/") || // 정적 파일 (public 폴더)
-    pathname.includes("/favicon.ico")
+    pathname.startsWith("/_next/") ||
+    pathname.startsWith("/api/") ||
+    pathname.startsWith("/static/") ||
+    pathname.endsWith(".svg") ||
+    pathname.endsWith(".png") ||
+    pathname.endsWith(".jpg") ||
+    pathname.endsWith(".webp") ||
+    pathname.endsWith(".ico") ||
+    pathname.endsWith(".txt")
   ) {
     return NextResponse.next();
   }
