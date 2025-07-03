@@ -29,18 +29,19 @@ const ProjectDetailPage = () => {
         try {
           setLoading(true);
           const projectData = await getProject(projectId);
-          console.log(projectData);
-          setProject(projectData);
-          if (projectData.feedbacks) {
-            setFeedbacks(
-              projectData.feedbacks
-                .map((f) => ({ ...f, isChecked: false }))
-                .sort(
-                  (a, b) =>
-                    new Date(b.createdAt).getTime() -
-                    new Date(a.createdAt).getTime(),
-                ),
-            );
+          if (projectData.success) {
+            setProject(projectData.data);
+            if (projectData.data.feedbacks) {
+              setFeedbacks(
+                projectData.data.feedbacks
+                  .map((f) => ({ ...f, isChecked: false }))
+                  .sort(
+                    (a, b) =>
+                      new Date(b.createdAt).getTime() -
+                      new Date(a.createdAt).getTime(),
+                  ),
+              );
+            }
           }
         } catch (error) {
           console.error("Failed to fetch project data:", error);
