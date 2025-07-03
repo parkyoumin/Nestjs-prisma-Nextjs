@@ -8,6 +8,6 @@ export interface IProjectRepository {
   updateProject(id: string, data: UpdateProjectDto): Promise<Project | null>;
   deleteProject(id: string, userId: bigint): Promise<boolean>;
   findById(id: string): Promise<Project | null>;
-  getProject(id: string): Promise<Project | null>;
+  findProjectWithFeedbacks(id: string, userId: bigint): Promise<Project | null>;
   getProjects(userId: bigint): Promise<Project[]>;
 }

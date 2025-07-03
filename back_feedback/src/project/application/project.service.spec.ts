@@ -135,6 +135,35 @@ describe("ProjectService", () => {
     });
   });
 
+  describe("findProjectWithFeedbacks", () => {
+    it("프로젝트와 피드백 목록을 성공적으로 조회해야 한다", async () => {
+      // Given
+      const projectId = "some-uuid";
+      const userId = BigInt(1);
+      const expectedProject = new Project({
+        id: projectId,
+        title: "Project 1",
+        userId,
+        createdAt: new Date(),
+        deletedAt: null,
+        feedbackCount: 120,
+        feedbacks: [],
+      });
+
+      repository.findProjectWithFeedbacks.mockResolvedValue(expectedProject);
+
+      // When
+      const result = await service.findProjectWithFeedbacks(projectId, userId);
+
+      // Then
+      expect(result).toEqual(expectedProject);
+      expect(repository.findProjectWithFeedbacks).toHaveBeenCalledWith(
+        projectId,
+        userId,
+      );
+    });
+  });
+
   describe("getProjects", () => {
     it("사용자의 모든 프로젝트 목록과 피드백 개수를 반환해야 한다", async () => {
       // Given

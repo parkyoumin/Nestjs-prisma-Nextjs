@@ -53,9 +53,12 @@ export class ProjectPrismaRepository implements IProjectRepository {
     });
   }
 
-  async getProject(id: string): Promise<Project | null> {
+  async findProjectWithFeedbacks(
+    id: string,
+    userId: bigint,
+  ): Promise<Project | null> {
     return this.prisma.project.findUnique({
-      where: { id, deletedAt: null },
+      where: { id, deletedAt: null, userId },
       include: {
         feedbacks: {
           orderBy: {
