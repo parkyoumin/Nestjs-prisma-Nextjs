@@ -53,7 +53,20 @@ export class ProjectPrismaRepository implements IProjectRepository {
     });
   }
 
-  async findProjectsByUserId(userId: bigint): Promise<Project[]> {
+  async getProject(id: string): Promise<Project | null> {
+    return this.prisma.project.findUnique({
+      where: { id, deletedAt: null },
+      include: {
+        feedbacks: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      },
+    });
+  }
+
+  async getProjects(userId: bigint): Promise<Project[]> {
     const projectsWithCount = await this.prisma.project.findMany({
       where: { userId, deletedAt: null },
       include: {

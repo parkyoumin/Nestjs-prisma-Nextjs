@@ -19,7 +19,6 @@ export class DeleteFeedbackDto {
   @IsNotEmpty()
   projectId: string;
 
-  @BigInt()
   @IsNotEmpty()
   userId: bigint;
 }

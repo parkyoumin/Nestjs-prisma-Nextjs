@@ -32,7 +32,15 @@ export class ProjectService {
     }
   }
 
+  async getProject(id: string): Promise<Project> {
+    const project = await this.projectRepository.getProject(id);
+    if (!project) {
+      throw new ForbiddenException("Project not found or access denied.");
+    }
+    return project;
+  }
+
   async getProjects(userId: bigint): Promise<Project[]> {
-    return this.projectRepository.findProjectsByUserId(userId);
+    return this.projectRepository.getProjects(userId);
   }
 }

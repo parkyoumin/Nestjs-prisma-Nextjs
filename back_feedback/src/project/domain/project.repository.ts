@@ -6,7 +6,8 @@ export const IProjectRepository = Symbol("IProjectRepository");
 export interface IProjectRepository {
   createProject(data: CreateProjectDto): Promise<Project>;
   updateProject(id: string, data: UpdateProjectDto): Promise<Project | null>;
-  findById(id: string): Promise<Project | null>;
   deleteProject(id: string, userId: bigint): Promise<boolean>;
-  findProjectsByUserId(userId: bigint): Promise<Project[]>;
+  findById(id: string): Promise<Project | null>;
+  getProject(id: string): Promise<Project | null>;
+  getProjects(userId: bigint): Promise<Project[]>;
 }

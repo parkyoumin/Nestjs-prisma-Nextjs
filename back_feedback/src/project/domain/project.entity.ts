@@ -1,3 +1,5 @@
+import { Feedback } from "src/feedback/domain/feedback.entity";
+
 export class Project {
   readonly id: string;
   readonly title: string;
@@ -5,6 +7,7 @@ export class Project {
   readonly createdAt: Date;
   readonly deletedAt?: Date | null;
   readonly feedbackCount?: number;
+  readonly feedbacks?: Feedback[];
 
   constructor(props: {
     id: string;
@@ -13,6 +16,7 @@ export class Project {
     createdAt: Date;
     deletedAt?: Date | null;
     feedbackCount?: number;
+    feedbacks?: Feedback[];
   }) {
     this.id = props.id;
     this.title = props.title;
@@ -20,5 +24,6 @@ export class Project {
     this.createdAt = props.createdAt;
     this.deletedAt = props.deletedAt;
     this.feedbackCount = props.feedbackCount;
+    this.feedbacks = props.feedbacks;
   }
 }

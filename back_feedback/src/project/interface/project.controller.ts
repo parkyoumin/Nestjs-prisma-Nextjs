@@ -71,6 +71,11 @@ export class ProjectController {
     return this.projectService.deleteProject(id, user.id);
   }
 
+  @Get(":id")
+  async getProject(@Param("id") id: string) {
+    return this.projectService.getProject(id);
+  }
+
   @Get()
   async getProjects(@Req() req: AuthenticatedRequest) {
     const { user } = req;

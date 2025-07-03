@@ -10,7 +10,7 @@ const mockProjectRepository = {
   updateProject: jest.fn(),
   findById: jest.fn(),
   deleteProject: jest.fn(),
-  findProjectsByUserId: jest.fn(),
+  getProjects: jest.fn(),
 };
 
 describe("ProjectService", () => {
@@ -43,10 +43,15 @@ describe("ProjectService", () => {
         title: "New Test Project",
         userId: BigInt(1),
       };
-      const expectedProject = new Project();
-      expectedProject.id = "new-uuid";
-      expectedProject.title = createDto.title;
-      expectedProject.userId = createDto.userId;
+      const expectedProject = new Project({
+        id: "new-uuid",
+        title: createDto.title,
+        userId: createDto.userId,
+        createdAt: new Date(),
+        deletedAt: null,
+        feedbackCount: 0,
+        feedbacks: [],
+      });
 
       repository.createProject.mockResolvedValue(expectedProject);
 
@@ -69,9 +74,15 @@ describe("ProjectService", () => {
 
     it("프로젝트를 성공적으로 수정해야 한다", async () => {
       // Given
-      const expectedProject = new Project();
-      expectedProject.id = projectId;
-      expectedProject.title = updateDto.title;
+      const expectedProject = new Project({
+        id: projectId,
+        title: updateDto.title,
+        userId: updateDto.userId,
+        createdAt: new Date(),
+        deletedAt: null,
+        feedbackCount: 0,
+        feedbacks: [],
+      });
 
       repository.updateProject.mockResolvedValue(expectedProject);
 
@@ -146,14 +157,14 @@ describe("ProjectService", () => {
           feedbackCount: 85,
         },
       ];
-      repository.findProjectsByUserId.mockResolvedValue(expectedProjects);
+      repository.getProjects.mockResolvedValue(expectedProjects);
 
       // When
       const result = await service.getProjects(userId);
 
       // Then
       expect(result).toEqual(expectedProjects);
-      expect(repository.findProjectsByUserId).toHaveBeenCalledWith(userId);
+      expect(repository.getProjects).toHaveBeenCalledWith(userId);
     });
   });
 });
