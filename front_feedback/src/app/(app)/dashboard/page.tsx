@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
 import { Project } from "@/types/project";
 import ProjectCard from "@/components/ProjectCard";
 import { Search } from "lucide-react";
@@ -17,27 +16,32 @@ import { useModal } from "@/hooks/useModal";
 export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const router = useRouter();
   const { openModal } = useModal();
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const fetchedProjects = await getProjects();
-        setProjects(fetchedProjects || []);
-      } catch (err) {
-        console.error("Failed to fetch projects:", err);
+  const fetchProjects = useCallback(async () => {
+    try {
+      const response = await getProjects();
+      if (response.success) {
+        setProjects(response.data || []);
+      } else {
+        console.error("Failed to fetch projects:", response.message);
         setProjects([]);
       }
-    };
-    fetchProjects();
+    } catch (err) {
+      console.error("Failed to fetch projects:", err);
+      setProjects([]);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const handleOpenCreateModal = () => {
     openModal(
       <CreateProjectForm
-        onSuccess={(newProject) => {
-          setProjects((prevProjects) => [newProject, ...prevProjects]);
+        onSuccess={() => {
+          fetchProjects();
         }}
       />,
     );
@@ -47,12 +51,8 @@ export default function DashboardPage() {
     openModal(
       <EditProjectForm
         project={project}
-        onSuccess={(updatedProject) => {
-          setProjects((prevProjects) =>
-            prevProjects.map((p) =>
-              p.id === updatedProject.id ? updatedProject : p,
-            ),
-          );
+        onSuccess={() => {
+          fetchProjects();
         }}
       />,
     );
@@ -63,9 +63,7 @@ export default function DashboardPage() {
       <DeleteConfirm
         projectId={projectId}
         onSuccess={() => {
-          setProjects((prevProjects) =>
-            prevProjects.filter((p) => p.id !== projectId),
-          );
+          fetchProjects();
         }}
       />,
     );
@@ -124,11 +122,7 @@ export default function DashboardPage() {
 // --- Modal Content Components ---
 
 // 1. Create Project Form
-const CreateProjectForm = ({
-  onSuccess,
-}: {
-  onSuccess: (newProject: Project) => void;
-}) => {
+const CreateProjectForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const { closeModal } = useModal();
   const [newProjectTitle, setNewProjectTitle] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -144,9 +138,13 @@ const CreateProjectForm = ({
     setCreateError(null);
 
     try {
-      const newProject = await createProject(newProjectTitle);
-      onSuccess(newProject);
-      closeModal();
+      const response = await createProject(newProjectTitle);
+      if (response.success) {
+        onSuccess();
+        closeModal();
+      } else {
+        setCreateError(response.message || "Failed to create project.");
+      }
     } catch (err: any) {
       setCreateError(err.message);
     } finally {
@@ -201,7 +199,7 @@ const EditProjectForm = ({
   onSuccess,
 }: {
   project: Project;
-  onSuccess: (updatedProject: Project) => void;
+  onSuccess: () => void;
 }) => {
   const { closeModal } = useModal();
   const [updatedProjectTitle, setUpdatedProjectTitle] = useState(project.title);
@@ -218,12 +216,13 @@ const EditProjectForm = ({
     setUpdateError(null);
 
     try {
-      const updatedProject = await updateProject(
-        project.id,
-        updatedProjectTitle,
-      );
-      onSuccess(updatedProject);
-      closeModal();
+      const response = await updateProject(project.id, updatedProjectTitle);
+      if (response.success) {
+        onSuccess();
+        closeModal();
+      } else {
+        setUpdateError(response.message || "Failed to update project.");
+      }
     } catch (err: any) {
       setUpdateError(err.message);
     } finally {
@@ -289,12 +288,16 @@ const DeleteConfirm = ({
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
-      await deleteProject(projectId);
-      onSuccess();
-      closeModal();
+      const response = await deleteProject(projectId);
+      if (response.success) {
+        onSuccess();
+        closeModal();
+      } else {
+        console.error("Failed to delete project:", response.message);
+        closeModal();
+      }
     } catch (err: any) {
       console.error("Failed to delete project:", err);
-      // You could show a toast message here for the error
       closeModal();
     }
   };

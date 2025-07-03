@@ -1,37 +1,38 @@
 import { get, post, put, del } from "@/api";
 import { Project } from "@/types/project";
+import { UnifiedResponse } from "@/types/api";
 
-export const getProjects = async (): Promise<Project[]> => {
-  const response = await get("/project");
-  console.log(response);
-
-  return response.data;
+export const getProjects = async (): Promise<UnifiedResponse<Project[]>> => {
+  return get<Project[]>("/project");
 };
 
-export const getProject = async (id: string): Promise<Project> => {
-  const response = await get(`/project/${id}`);
-  return response.data;
+export const getProject = async (
+  id: string,
+): Promise<UnifiedResponse<Project>> => {
+  return get<Project>(`/project/${id}`);
 };
 
-export const createProject = async (title: string): Promise<Project> => {
+export const createProject = async (
+  title: string,
+): Promise<UnifiedResponse<{ createdId: string }>> => {
   if (!title.trim()) {
     throw new Error("Project title cannot be empty.");
   }
-  const response = await post("/project", { title });
-  return response.data;
+  return post<{ createdId: string }>("/project", { title });
 };
 
 export const updateProject = async (
   id: string,
   title: string,
-): Promise<Project> => {
+): Promise<UnifiedResponse<null>> => {
   if (!title.trim()) {
     throw new Error("Project title cannot be empty.");
   }
-  const response = await put(`/project/${id}`, { title });
-  return response.data;
+  return put<null>(`/project/${id}`, { title });
 };
 
-export const deleteProject = async (id: string): Promise<void> => {
-  await del(`/project/${id}`);
+export const deleteProject = async (
+  id: string,
+): Promise<UnifiedResponse<null>> => {
+  return del<null>(`/project/${id}`);
 };

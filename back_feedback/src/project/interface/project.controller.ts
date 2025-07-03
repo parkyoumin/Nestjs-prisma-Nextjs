@@ -41,10 +41,11 @@ export class ProjectController {
     const { user } = req;
     const { title } = body;
 
-    return this.projectService.createProject({
+    const project = await this.projectService.createProject({
       title,
       userId: user.id,
     });
+    return { createdId: project.id };
   }
 
   @Put(":id")
@@ -56,7 +57,7 @@ export class ProjectController {
     const { user } = req;
     const { title } = body;
 
-    return this.projectService.updateProject(id, {
+    await this.projectService.updateProject(id, {
       title,
       userId: user.id,
     });
@@ -68,7 +69,7 @@ export class ProjectController {
     @Param("id") id: string,
   ) {
     const { user } = req;
-    return this.projectService.deleteProject(id, user.id);
+    await this.projectService.deleteProject(id, user.id);
   }
 
   @Get(":id")
