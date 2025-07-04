@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: feedback-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./back_feedback
+      dockerfile: Dockerfile
+    container_name: feedback-backend
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      REFRESH_JWT_SECRET_KEY: ${REFRESH_JWT_SECRET_KEY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
+      CLIENT_URL: ${CLIENT_URL}
+    restart: always
+
+  frontend:
+    build:
+      context: ./front_feedback
+      dockerfile: Dockerfile
+    container_name: feedback-frontend
+    ports:
+      - "3002:3002"
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    restart: always
+
+volumes:
+  postgres_data:
