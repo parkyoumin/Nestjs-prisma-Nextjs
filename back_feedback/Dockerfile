@@ -4,6 +4,9 @@ FROM node:20-slim
 # 2. pnpm 설치
 RUN npm install -g pnpm
 
+# Prisma가 OpenSSL 버전을 올바르게 감지할 수 있도록 openssl 패키지를 설치 (에러 메시지가 지시한 내용)
+RUN apt-get update && apt-get install -y openssl --no-install-recommends && rm -rf /var/lib/apt/lists/*
+
 # 3. 작업 디렉토리 설정
 WORKDIR /usr/src/app
 
