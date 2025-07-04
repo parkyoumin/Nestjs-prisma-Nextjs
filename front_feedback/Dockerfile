@@ -7,6 +7,10 @@ RUN npm i -g pnpm
 # 3. 작업 디렉토리 설정
 WORKDIR /usr/src/app
 
+# Compose 파일에서 전달받을 빌드 인자 선언
+ARG NEXT_PUBLIC_API_URL
+# 빌드 과정에서 사용할 환경 변수로 설정
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 # 4. 의존성 설치를 위한 스테이지
 FROM base AS deps
@@ -18,6 +22,7 @@ RUN pnpm i --frozen-lockfile
 FROM base AS builder
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY . .
+
 RUN pnpm build
 
 
