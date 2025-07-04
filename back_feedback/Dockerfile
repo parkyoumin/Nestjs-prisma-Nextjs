@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 
 # 4. 의존성 설치
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # 5. 소스 코드 복사
 COPY . .
