@@ -4,6 +4,9 @@ FROM node:20-alpine
 # 2. pnpm 설치
 RUN npm install -g pnpm
 
+# Alpine Linux에 Prisma 호환성을 위한 OpenSSL 1.1 설치
+RUN apk add --no-cache openssl1.1-compat
+
 # 3. 작업 디렉토리 설정
 WORKDIR /usr/src/app
 
