@@ -25,9 +25,8 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalInterceptors(new ResponseInterceptor(app.get(Reflector)));
 
-  // TODO : env
   app.enableCors({
-    origin: "http://localhost:3002",
+    origin: process.env.CLIENT_URL,
     credentials: true,
     exposedHeaders: ["Access-Token", "Refresh-Token-Invalid", "Role"],
   });

@@ -1,23 +1,22 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { UnifiedResponse } from "@/types/api";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-const axiosInstance = axios.create({
-  baseURL: apiUrl,
+const instance = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
 });
 
 const axiosPublicInstance = axios.create({
-  baseURL: apiUrl,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
-axiosInstance.interceptors.response.use(
+instance.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401 && typeof window !== "undefined") {
       try {
         await post("/auth/refresh");
-        return axiosInstance(error.config);
+        return instance(error.config);
       } catch (refreshError) {
         console.error(
           "Token refresh failed, redirecting to login.",
@@ -49,7 +48,7 @@ const get = <T>(
   url: string,
   config?: AxiosRequestConfig,
 ): Promise<UnifiedResponse<T>> => {
-  return handleRequest(axiosInstance.get(url, config));
+  return handleRequest(instance.get(url, config));
 };
 
 const post = <T>(
@@ -57,7 +56,7 @@ const post = <T>(
   data?: any,
   config?: AxiosRequestConfig,
 ): Promise<UnifiedResponse<T>> => {
-  return handleRequest(axiosInstance.post(url, data, config));
+  return handleRequest(instance.post(url, data, config));
 };
 
 const publicPost = <T>(
@@ -73,14 +72,14 @@ const put = <T>(
   data?: any,
   config?: AxiosRequestConfig,
 ): Promise<UnifiedResponse<T>> => {
-  return handleRequest(axiosInstance.put(url, data, config));
+  return handleRequest(instance.put(url, data, config));
 };
 
 const del = <T>(
   url: string,
   config?: AxiosRequestConfig,
 ): Promise<UnifiedResponse<T>> => {
-  return handleRequest(axiosInstance.delete(url, config));
+  return handleRequest(instance.delete(url, config));
 };
 
 export { get, post, publicPost, put, del };

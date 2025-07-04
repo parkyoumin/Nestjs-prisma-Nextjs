@@ -57,13 +57,15 @@ export async function middleware(request: NextRequest) {
 
   // 리프레시 토큰으로 새 accessToken 발급 시도
   try {
-    // TODO : env
-    const refreshResponse = await fetch("http://localhost:3001/auth/refresh", {
-      method: "GET",
-      headers: {
-        Cookie: `refresh_token=${refreshToken}; provider_account_id=${providerAccountId}`,
+    const refreshResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+      {
+        method: "GET",
+        headers: {
+          Cookie: `refresh_token=${refreshToken}; provider_account_id=${providerAccountId}`,
+        },
       },
-    });
+    );
 
     if (refreshResponse.ok) {
       // 성공 시, 새 토큰이 포함된 쿠키와 함께 원래 요청 경로로 리디렉션
@@ -88,4 +90,22 @@ export async function middleware(request: NextRequest) {
   response.cookies.delete("refresh_token");
   response.cookies.delete("provider_account_id");
   return response;
+}
+
+async function refreshAccessToken(refreshToken: string) {
+  try {
+    const refreshResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+      {
+        method: "POST",
+        headers: {
+          Cookie: `refresh-token=${refreshToken}`,
+        },
+      },
+    );
+    return refreshResponse;
+  } catch (error) {
+    console.error("Error refreshing access token:", error);
+    return new Response("Error refreshing access token", { status: 500 });
+  }
 }

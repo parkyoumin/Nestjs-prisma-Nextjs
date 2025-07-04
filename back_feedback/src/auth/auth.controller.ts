@@ -77,7 +77,7 @@ export class AuthController {
       maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     });
 
-    res.redirect("http://localhost:3002/login-success");
+    res.redirect(`${process.env.CLIENT_URL}/login-success`);
   }
 
   @Get("/refresh")

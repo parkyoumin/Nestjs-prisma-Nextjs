@@ -34,7 +34,7 @@ export class ResponseInterceptor<T>
     return next.handle().pipe(
       map((data) => ({
         success: true,
-        message: "요청에 성공했습니다.", // TODO: 추후 메시지는 동적으로 변경 가능
+        message: "success",
         data: data || null,
       })),
     );
