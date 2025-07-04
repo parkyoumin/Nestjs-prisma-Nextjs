@@ -1,11 +1,11 @@
-# 1. 베이스 이미지 설정
-FROM node:20-alpine
+# 1. 베이스 이미지 설정 (호환성이 더 좋은 slim 버전으로 변경)
+FROM node:20-slim
 
 # 2. pnpm 설치
 RUN npm install -g pnpm
 
-# Alpine Linux에 Prisma 호환성을 위한 OpenSSL 1.1 설치
-RUN apk add --no-cache openssl1.1-compat
+# Prisma 호환성을 위한 OpenSSL 1.1 설치
+RUN apt-get update && apt-get install -y libssl1.1 --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 # 3. 작업 디렉토리 설정
 WORKDIR /usr/src/app
