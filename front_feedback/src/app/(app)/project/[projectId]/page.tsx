@@ -160,12 +160,12 @@ const ProjectDetailPage = () => {
                 className="group flex items-start justify-between gap-x-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all duration-150 ease-in-out hover:border-gray-300 hover:bg-gray-50"
               >
                 <div className="flex min-w-0 flex-1 items-start gap-x-4">
-                  <input
+                  {/* <input
                     type="checkbox"
                     checked={feedback.isChecked}
                     onChange={() => handleToggleCheck(feedback.id)}
                     className="mt-1 h-5 w-5 flex-shrink-0 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  />
+                  /> */}
                   <div className="min-w-0 flex-auto">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-semibold leading-6 text-gray-900">
