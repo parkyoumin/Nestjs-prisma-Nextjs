@@ -2,7 +2,7 @@ import Image from "next/image";
 import PrimaryButton from "@/components/PrimaryButton";
 
 const HaveToLoginPage = () => {
-  const loginUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
+  const loginUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`;
 
   return (
     <main className="flex h-full flex-col items-center justify-center bg-zinc-50/90">
