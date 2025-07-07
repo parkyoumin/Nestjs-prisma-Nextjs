@@ -57,13 +57,35 @@ export default function ProjectCard({
     setIsMenuOpen(false);
   };
 
-  const copyLink = (e: React.MouseEvent) => {
+  const copyLink = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const encodedProjectName = encodeURIComponent(project.title);
     const url = `${window.location.origin}/feedback/${project.id}?name=${encodedProjectName}`;
-    navigator.clipboard.writeText(url);
-    addToast({ message: "Link copied!", type: "success" });
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        // Use modern Clipboard API in secure contexts
+        await navigator.clipboard.writeText(url);
+      } else {
+        // Fallback for insecure contexts or older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = url;
+        // Make the textarea out of sight
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      addToast({ message: "Link copied!", type: "success" });
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+      addToast({ message: "Failed to copy link.", type: "error" });
+    }
   };
 
   return (
