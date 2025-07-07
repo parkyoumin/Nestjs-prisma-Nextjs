@@ -20,7 +20,7 @@ export default function Home() {
             </div>
             <div className="text-left">
               <h1 className="text-5xl font-bold leading-tight">
-                Collect user feedback in one place
+                Collect user feedback in one place!
               </h1>
               <p className="mt-4 text-lg text-gray-600">
                 Feedback Central is the easiest way to gather feedback from your
