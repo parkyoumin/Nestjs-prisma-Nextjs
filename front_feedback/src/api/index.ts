@@ -48,7 +48,7 @@ const get = <T>(
   url: string,
   config?: AxiosRequestConfig,
 ): Promise<UnifiedResponse<T>> => {
-  return handleRequest(instance.get(url, config));
+  return handleRequest(instance.get(`/api${url}`, config));
 };
 
 const post = <T>(
@@ -56,7 +56,7 @@ const post = <T>(
   data?: any,
   config?: AxiosRequestConfig,
 ): Promise<UnifiedResponse<T>> => {
-  return handleRequest(instance.post(url, data, config));
+  return handleRequest(instance.post(`/api${url}`, data, config));
 };
 
 const publicPost = <T>(
@@ -64,7 +64,7 @@ const publicPost = <T>(
   data?: any,
   config?: AxiosRequestConfig,
 ): Promise<UnifiedResponse<T>> => {
-  return handleRequest(axiosPublicInstance.post(url, data, config));
+  return handleRequest(axiosPublicInstance.post(`/api${url}`, data, config));
 };
 
 const put = <T>(
@@ -72,14 +72,14 @@ const put = <T>(
   data?: any,
   config?: AxiosRequestConfig,
 ): Promise<UnifiedResponse<T>> => {
-  return handleRequest(instance.put(url, data, config));
+  return handleRequest(instance.put(`/api${url}`, data, config));
 };
 
 const del = <T>(
   url: string,
   config?: AxiosRequestConfig,
 ): Promise<UnifiedResponse<T>> => {
-  return handleRequest(instance.delete(url, config));
+  return handleRequest(instance.delete(`/api${url}`, config));
 };
 
 export { get, post, publicPost, put, del };
