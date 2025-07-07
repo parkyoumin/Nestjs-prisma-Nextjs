@@ -27,7 +27,7 @@ export default function Home() {
                 users, organize it, and turn it into actionable insights.
               </p>
               <PrimaryButton
-                href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google`}
+                href={`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`}
                 className="mt-8"
               >
                 Get started

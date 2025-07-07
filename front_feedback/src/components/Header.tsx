@@ -66,7 +66,7 @@ const Header = () => {
             </div>
           ) : (
             <PrimaryButton
-              href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google`}
+              href={`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`}
               className="!w-auto !px-4 !py-2"
             >
               Get started
