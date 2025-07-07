@@ -11,6 +11,18 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  nginx-proxy-manager:
+    image: "jc21/nginx-proxy-manager:latest"
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8181:81"
+    volumes:
+      - ./nginx-proxy-manager/data:/data
+      - ./nginx-proxy-manager/letsencrypt:/etc/letsencrypt
+
   backend:
     build:
       context: ./back_feedback
@@ -38,8 +50,6 @@ services:
       args:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     container_name: feedback-frontend
-    ports:
-      - "3000:3000"
     depends_on:
       - backend
     environment:
