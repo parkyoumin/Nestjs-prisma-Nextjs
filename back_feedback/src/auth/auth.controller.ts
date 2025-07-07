@@ -56,24 +56,30 @@ export class AuthController {
       loggedInUser.id,
     );
 
+    const clientUrl = new URL(process.env.CLIENT_URL);
+    const cookieDomain = clientUrl.hostname;
+
     await this.userService.updateRefreshToken(providerAccountId, refreshToken);
 
     res.cookie("provider_account_id", providerAccountId, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       sameSite: "lax",
+      domain: cookieDomain,
       maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     });
     res.cookie("access_token", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       sameSite: "lax",
+      domain: cookieDomain,
       maxAge: 1000 * 60 * 60, // 1 hour
     });
     res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       sameSite: "lax",
+      domain: cookieDomain,
       maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     });
 
@@ -104,6 +110,9 @@ export class AuthController {
       user.id,
     );
 
+    const clientUrl = new URL(process.env.CLIENT_URL);
+    const cookieDomain = clientUrl.hostname;
+
     await this.userService.updateRefreshToken(
       providerAccountId,
       newRefreshToken,
@@ -111,14 +120,16 @@ export class AuthController {
 
     res.cookie("access_token", newAccessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       sameSite: "lax",
+      domain: cookieDomain,
       maxAge: 1000 * 60 * 60, // 1 hour
     });
     res.cookie("refresh_token", newRefreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       sameSite: "lax",
+      domain: cookieDomain,
       maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     });
   }
@@ -134,20 +145,26 @@ export class AuthController {
 
     await this.authService.logout(providerAccountId);
 
+    const clientUrl = new URL(process.env.CLIENT_URL);
+    const cookieDomain = clientUrl.hostname;
+
     res.clearCookie("provider_account_id", {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
+      domain: cookieDomain,
     });
     res.clearCookie("access_token", {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
+      domain: cookieDomain,
     });
     res.clearCookie("refresh_token", {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
+      domain: cookieDomain,
     });
   }
 
@@ -165,20 +182,26 @@ export class AuthController {
 
     await this.authService.withdraw(providerAccountId);
 
+    const clientUrl = new URL(process.env.CLIENT_URL);
+    const cookieDomain = clientUrl.hostname;
+
     res.clearCookie("provider_account_id", {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
+      domain: cookieDomain,
     });
     res.clearCookie("access_token", {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
+      domain: cookieDomain,
     });
     res.clearCookie("refresh_token", {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
+      domain: cookieDomain,
     });
   }
 }
