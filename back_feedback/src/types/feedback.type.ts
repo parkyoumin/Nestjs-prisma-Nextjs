@@ -22,3 +22,20 @@ export class DeleteFeedbackDto {
   @IsNotEmpty()
   userId: bigint;
 }
+
+export class GetFeedbacksByProjectDto {
+  @IsString()
+  @IsNotEmpty()
+  projectId: string;
+
+  @IsNotEmpty()
+  userId: bigint;
+
+  @IsNumber()
+  @IsNotEmpty()
+  page: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  pageSize: number;
+}

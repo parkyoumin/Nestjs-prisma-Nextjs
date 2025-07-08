@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { getProject } from "@/services/projectService";
-import { deleteFeedback } from "@/services/feedbackService";
+import {
+  deleteFeedback,
+  getFeedbacksByProject,
+} from "@/services/feedbackService";
 import { Project } from "@/types/project";
 import { Feedback } from "@/types/feedback";
 import { useAuthStore } from "@/store/auth";
@@ -17,42 +20,86 @@ const ProjectDetailPage = () => {
   const params = useParams();
   const projectId = params.projectId as string;
   const { user } = useAuthStore();
-  const { openModal, closeModal } = useModal();
+  const { openModal } = useModal();
 
   const [project, setProject] = useState<Project | null>(null);
   const [feedbacks, setFeedbacks] = useState<FeedbackWithStatus[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [projectLoading, setProjectLoading] = useState(true);
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [feedbacksLoading, setFeedbacksLoading] = useState(false);
+
+  const observer = useRef<IntersectionObserver>();
+  const lastFeedbackElementRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (feedbacksLoading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [feedbacksLoading, hasMore],
+  );
 
   useEffect(() => {
     if (projectId && user) {
-      const fetchData = async () => {
+      const fetchProjectData = async () => {
         try {
-          setLoading(true);
+          setProjectLoading(true);
           const projectData = await getProject(projectId);
           if (projectData.success) {
             setProject(projectData.data);
-            if (projectData.data.feedbacks) {
-              setFeedbacks(
-                projectData.data.feedbacks
-                  .map((f) => ({ ...f, isChecked: false }))
-                  .sort(
-                    (a, b) =>
-                      new Date(b.createdAt).getTime() -
-                      new Date(a.createdAt).getTime(),
-                  ),
-              );
-            }
           }
         } catch (error) {
           console.error("Failed to fetch project data:", error);
           setProject(null);
         } finally {
-          setLoading(false);
+          setProjectLoading(false);
         }
       };
-      fetchData();
+      fetchProjectData();
+      setFeedbacks([]);
+      setPage(1);
+      setHasMore(true);
     }
   }, [projectId, user]);
+
+  useEffect(() => {
+    if (!projectId || !user || !hasMore) return;
+
+    const fetchFeedbacks = async () => {
+      setFeedbacksLoading(true);
+      try {
+        const response = await getFeedbacksByProject(projectId, page, 10);
+        if (response.success) {
+          const newFeedbacks = response.data.feedbacks.map((f) => ({
+            ...f,
+            isChecked: false,
+          }));
+          setFeedbacks((prev) => [...prev, ...newFeedbacks]);
+          setHasMore(
+            response.data.feedbacks.length > 0 &&
+              response.data.total > page * 10,
+          );
+        } else {
+          setHasMore(false);
+        }
+      } catch (error) {
+        console.error("Failed to fetch feedbacks:", error);
+        setHasMore(false);
+      } finally {
+        setFeedbacksLoading(false);
+      }
+    };
+
+    if (page > 0) {
+      fetchFeedbacks();
+    }
+  }, [projectId, user, page, hasMore]);
 
   const handleToggleCheck = (feedbackId: number) => {
     setFeedbacks(
@@ -74,7 +121,7 @@ const ProjectDetailPage = () => {
     );
   };
 
-  if (loading) {
+  if (projectLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <p className="text-gray-500">Loading project details...</p>
@@ -142,7 +189,7 @@ const ProjectDetailPage = () => {
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Feedback</h2>
 
-        {feedbacks.length === 0 ? (
+        {feedbacks.length === 0 && !feedbacksLoading ? (
           <div className="mt-10 rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
             <h3 className="text-lg font-medium text-gray-900">
               No feedback received yet
@@ -154,53 +201,92 @@ const ProjectDetailPage = () => {
           </div>
         ) : (
           <ul className="mt-6 space-y-4">
-            {feedbacks.map((feedback) => (
-              <li
-                key={feedback.id}
-                className="group flex items-start justify-between gap-x-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all duration-150 ease-in-out hover:border-gray-300 hover:bg-gray-50"
-              >
-                <div className="flex min-w-0 flex-1 items-start gap-x-4">
-                  {/* <input
-                    type="checkbox"
-                    checked={feedback.isChecked}
-                    onChange={() => handleToggleCheck(feedback.id)}
-                    className="mt-1 h-5 w-5 flex-shrink-0 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  /> */}
-                  <div className="min-w-0 flex-auto">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold leading-6 text-gray-900">
-                        {new Date(feedback.createdAt).toLocaleDateString(
-                          "en-US",
-                          {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          },
-                        )}
+            {feedbacks.map((feedback, index) => {
+              const itemContent = (
+                <>
+                  <div className="flex min-w-0 flex-1 items-start gap-x-4">
+                    <div className="min-w-0 flex-auto">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold leading-6 text-gray-900">
+                          {new Date(feedback.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            },
+                          )}
+                        </p>
+                      </div>
+                      <p
+                        className={`mt-1 text-base leading-relaxed ${
+                          feedback.isChecked
+                            ? "text-gray-400 line-through"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {feedback.message}
                       </p>
+                      <p className="mt-2 text-sm text-gray-500">Anonymous</p>
                     </div>
-                    <p
-                      className={`mt-1 text-base leading-relaxed ${
-                        feedback.isChecked
-                          ? "text-gray-400 line-through"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {feedback.message}
-                    </p>
-                    <p className="mt-2 text-sm text-gray-500">Anonymous</p>
                   </div>
-                </div>
-                <button
-                  onClick={() => openDeleteConfirmModal(feedback.id)}
-                  className="rounded-md bg-white py-1 px-2.5 text-sm font-semibold text-gray-700 opacity-0 shadow-sm ring-1 ring-inset ring-gray-300 transition-all duration-150 ease-in-out hover:bg-gray-50 group-hover:opacity-100"
-                  aria-label="Delete feedback"
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
+                  <button
+                    onClick={() => openDeleteConfirmModal(feedback.id)}
+                    className="rounded-md bg-white py-1 px-2.5 text-sm font-semibold text-gray-700 opacity-0 shadow-sm ring-1 ring-inset ring-gray-300 transition-all duration-150 ease-in-out hover:bg-gray-50 group-hover:opacity-100"
+                    aria-label="Delete feedback"
+                  >
+                    Delete
+                  </button>
+                </>
+              );
+
+              if (feedbacks.length === index + 1) {
+                return (
+                  <li
+                    ref={lastFeedbackElementRef}
+                    key={feedback.id}
+                    className="group flex items-start justify-between gap-x-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all duration-150 ease-in-out hover:border-gray-300 hover:bg-gray-50"
+                  >
+                    {itemContent}
+                  </li>
+                );
+              } else {
+                return (
+                  <li
+                    key={feedback.id}
+                    className="group flex items-start justify-between gap-x-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all duration-150 ease-in-out hover:border-gray-300 hover:bg-gray-50"
+                  >
+                    {itemContent}
+                  </li>
+                );
+              }
+            })}
           </ul>
+        )}
+        {feedbacksLoading && (
+          <div className="flex justify-center items-center p-4">
+            <svg
+              className="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <p className="text-gray-500">Loading more feedbacks...</p>
+          </div>
         )}
       </div>
     </main>

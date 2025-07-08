@@ -4,6 +4,7 @@ import { IProjectRepository } from "../../project/domain/project.repository";
 import {
   CreateFeedbackDto,
   DeleteFeedbackDto,
+  GetFeedbacksByProjectDto,
 } from "../../types/feedback.type";
 
 @Injectable()
@@ -23,6 +24,27 @@ export class FeedbackService {
       throw new ForbiddenException("Project not found");
     }
     return this.feedbackRepository.createFeedback(createFeedbackDto);
+  }
+
+  async getFeedbacksByProject(getFeedbacksDto: GetFeedbacksByProjectDto) {
+    const { projectId, userId, page, pageSize } = getFeedbacksDto;
+    const project = await this.projectRepository.findById(projectId);
+
+    if (!project) {
+      throw new ForbiddenException("Project not found");
+    }
+
+    if (project.userId !== userId) {
+      throw new ForbiddenException(
+        "You are not authorized to view these feedbacks",
+      );
+    }
+
+    return this.feedbackRepository.getFeedbacksByProject({
+      projectId,
+      page,
+      pageSize,
+    });
   }
 
   async deleteFeedback(deleteFeedbackDto: DeleteFeedbackDto) {

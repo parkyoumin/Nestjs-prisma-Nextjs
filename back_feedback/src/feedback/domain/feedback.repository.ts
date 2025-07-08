@@ -6,6 +6,12 @@ export interface IFeedbackRepository {
     projectId: string;
   }): Promise<Feedback>;
 
+  getFeedbacksByProject(data: {
+    projectId: string;
+    page: number;
+    pageSize: number;
+  }): Promise<{ feedbacks: Feedback[]; total: number }>;
+
   deleteFeedback(id: number): Promise<void>;
 }
 

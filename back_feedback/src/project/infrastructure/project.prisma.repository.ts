@@ -59,13 +59,6 @@ export class ProjectPrismaRepository implements IProjectRepository {
   ): Promise<Project | null> {
     return this.prisma.project.findUnique({
       where: { id, deletedAt: null, userId },
-      include: {
-        feedbacks: {
-          orderBy: {
-            createdAt: "desc",
-          },
-        },
-      },
     });
   }
 
