@@ -62,22 +62,36 @@ export class ProjectPrismaRepository implements IProjectRepository {
     });
   }
 
-  async getProjects(userId: bigint): Promise<Project[]> {
-    const projectsWithCount = await this.prisma.project.findMany({
-      where: { userId, deletedAt: null },
-      include: {
-        _count: {
-          select: { feedbacks: { where: { deletedAt: null } } },
+  async getProjects(
+    userId: bigint,
+    page: number,
+    pageSize: number,
+  ): Promise<{ projects: Project[]; total: number }> {
+    const skip = (page - 1) * pageSize;
+    const [total, projectsWithCount] = await this.prisma.$transaction([
+      this.prisma.project.count({
+        where: { userId, deletedAt: null },
+      }),
+      this.prisma.project.findMany({
+        where: { userId, deletedAt: null },
+        include: {
+          _count: {
+            select: { feedbacks: { where: { deletedAt: null } } },
+          },
         },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip: skip,
+        take: pageSize,
+      }),
+    ]);
 
-    return projectsWithCount.map((p) => ({
+    const projects = projectsWithCount.map((p) => ({
       ...p,
       feedbackCount: p._count.feedbacks,
     }));
+
+    return { total, projects };
   }
 }

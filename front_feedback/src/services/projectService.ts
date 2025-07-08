@@ -2,8 +2,13 @@ import { get, post, put, del } from "@/api";
 import { Project } from "@/types/project";
 import { UnifiedResponse } from "@/types/api";
 
-export const getProjects = async (): Promise<UnifiedResponse<Project[]>> => {
-  return get<Project[]>("/project");
+export const getProjects = async (
+  page: number,
+  pageSize: number,
+): Promise<UnifiedResponse<{ projects: Project[]; total: number }>> => {
+  return get<{ projects: Project[]; total: number }>("/project", {
+    params: { page, pageSize },
+  });
 };
 
 export const getProject = async (

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Project } from "@/types/project";
 import ProjectCard from "@/components/ProjectCard";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import PrimaryButton from "@/components/PrimaryButton";
 import {
   createProject,
@@ -18,60 +18,93 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const { openModal } = useModal();
 
-  const fetchProjects = useCallback(async () => {
-    try {
-      const response = await getProjects();
-      if (response.success) {
-        setProjects(response.data || []);
-      } else {
-        console.error("Failed to fetch projects:", response.message);
-        setProjects([]);
-      }
-    } catch (err) {
-      console.error("Failed to fetch projects:", err);
-      setProjects([]);
-    }
-  }, []);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
+
+  const observer = useRef<IntersectionObserver>();
+  const lastProjectElementRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore],
+  );
 
   useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
+    let isMounted = true;
+    setLoading(true);
+    getProjects(page, 9)
+      .then((response) => {
+        if (!isMounted) return;
+        if (response.success) {
+          const newProjects = response.data.projects || [];
+          setProjects((prev) => {
+            const updatedProjects =
+              page === 1 ? newProjects : [...prev, ...newProjects];
+            setHasMore(response.data.total > updatedProjects.length);
+            return updatedProjects;
+          });
+        } else {
+          setHasMore(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          console.error("Failed to fetch projects:", err);
+          setHasMore(false);
+        }
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [page, refetchTrigger]);
+
+  const refreshList = useCallback(() => {
+    setProjects([]);
+    setHasMore(true);
+    if (page === 1) {
+      setRefetchTrigger((t) => t + 1);
+    } else {
+      setPage(1);
+    }
+  }, [page]);
 
   const handleOpenCreateModal = () => {
-    openModal(
-      <CreateProjectForm
-        onSuccess={() => {
-          fetchProjects();
-        }}
-      />,
-    );
+    openModal(<CreateProjectForm onSuccess={refreshList} />);
   };
 
   const handleOpenEditModal = (project: Project) => {
-    openModal(
-      <EditProjectForm
-        project={project}
-        onSuccess={() => {
-          fetchProjects();
-        }}
-      />,
-    );
+    openModal(<EditProjectForm project={project} onSuccess={refreshList} />);
   };
 
   const handleOpenDeleteModal = (projectId: string) => {
-    openModal(
-      <DeleteConfirm
-        projectId={projectId}
-        onSuccess={() => {
-          fetchProjects();
-        }}
-      />,
-    );
+    openModal(<DeleteConfirm projectId={projectId} onSuccess={refreshList} />);
   };
 
   const filteredProjects = projects.filter((project) =>
     project.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  // Initial full-page loader
+  if (loading && projects.length === 0) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -105,15 +138,42 @@ export default function DashboardPage() {
 
         {/* Project List */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredProjects.map((project: Project) => (
-            <ProjectCard
+          {filteredProjects.map((project: Project, index) => (
+            <div
               key={project.id}
-              project={project}
-              onEdit={handleOpenEditModal}
-              onDelete={handleOpenDeleteModal}
-            />
+              ref={
+                index === filteredProjects.length - 1
+                  ? lastProjectElementRef
+                  : null
+              }
+            >
+              <ProjectCard
+                project={project}
+                onEdit={handleOpenEditModal}
+                onDelete={handleOpenDeleteModal}
+              />
+            </div>
           ))}
         </div>
+
+        {/* Loading indicator for pagination */}
+        {loading && projects.length > 0 && (
+          <div className="mt-8 flex justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          </div>
+        )}
+
+        {/* No projects message */}
+        {filteredProjects.length === 0 && !loading && (
+          <div className="mt-10 rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
+            <h3 className="text-lg font-medium text-gray-900">
+              No projects found
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Get started by creating a new project.
+            </p>
+          </div>
+        )}
       </div>
     </>
   );

@@ -8,6 +8,9 @@ import {
   Put,
   Req,
   UseGuards,
+  Query,
+  ParseIntPipe,
+  DefaultValuePipe,
 } from "@nestjs/common";
 import { ProjectService } from "../application/project.service";
 import { JwtAuthGuard } from "src/auth/jwt/jwt.guard";
@@ -82,8 +85,13 @@ export class ProjectController {
   }
 
   @Get()
-  async getProjects(@Req() req: AuthenticatedRequest) {
+  async getProjects(
+    @Req() req: AuthenticatedRequest,
+    @Query("page", new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query("pageSize", new DefaultValuePipe(10), ParseIntPipe)
+    pageSize: number,
+  ) {
     const { user } = req;
-    return this.projectService.getProjects(user.id);
+    return this.projectService.getProjects(user.id, page, pageSize);
   }
 }

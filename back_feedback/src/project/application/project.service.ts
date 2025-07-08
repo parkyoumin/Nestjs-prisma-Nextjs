@@ -55,7 +55,11 @@ export class ProjectService {
     return project;
   }
 
-  async getProjects(userId: bigint): Promise<Project[]> {
-    return this.projectRepository.getProjects(userId);
+  async getProjects(
+    userId: bigint,
+    page: number,
+    pageSize: number,
+  ): Promise<{ projects: Project[]; total: number }> {
+    return this.projectRepository.getProjects(userId, page, pageSize);
   }
 }
